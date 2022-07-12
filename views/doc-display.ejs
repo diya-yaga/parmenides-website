@@ -1,5 +1,25 @@
 <%- include('partials/header') -%>
 <body>
-    <p>hello!!</p>
+    <h1>Parmenides</h1>
+    <div class="doc-data">
+        <p>Document Title: <%= docTitle %></p>
+        <p>Unique ID: <%= uniqueID %></p>
+        <p>Publication Date: <%= pubDate %></p>
+        <p>Authors: 
+            <ul>
+                <% for (var i = 0; i < authors.length; i++) { %>
+                    <li><%= authors[i] %></li>
+                <% } %>
+            </ul>
+        </p>
+        <p>Metadata Attributes: 
+            <ul>
+                <% for (var i = 0; i < metadata.length; i++) { %>
+                    <li><%= metadata[i] %></li>
+                <% } %>
+            </ul>
+        </p>
+    </div>
+
 </body>
 </html>

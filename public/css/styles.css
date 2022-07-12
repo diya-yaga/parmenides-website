@@ -1,6 +1,11 @@
 html {
     margin: 5rem;
 }
+
+td, th {
+    word-wrap: break-word;
+    max-width: 150px;
+}
 .invisible {
     visibility: hidden;
     height: 0;
@@ -8,4 +13,9 @@ html {
 
 .invisible-row {
     display: none;
+}
+
+.term-data-1, .term-data-2, .doc-data {
+    outline: 1px solid;
+    padding: 1rem;
 }

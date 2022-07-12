@@ -1,5 +1,34 @@
 <%- include('partials/header') -%>
 <body>
-    
+    <h1>Parmenides</h1>
+    <h2>Term: <span style="text-decoration-line:underline"><%= term %></span></h2>
+    <br>
+    <div class="term-data-1">
+        <p>Normalized representation: <%= normRep %></p>
+        <p>Part of Speech tag: <%= posTag %></p>
+        <p>REI: <%= rei %></p>
+        <p>HEAD: <%= head %></p>
+        <p>DEP: <%= dep %></p>
+        <br>
+        <p>NLP phrases: <%= nlpPhrases %></p>
+    </div>
+    <br>
+    <div class="term-data-2">
+        <p>Hypernym: <%= hypernym %></p>
+        <p>Hyponyms: 
+            <ul>
+                <% for (var i = 0; i < hyponyms.length; i++) { %>
+                    <li><%= hyponyms[i] %></li>
+                <% } %>
+            </ul>
+        </p>
+        <p>Similar terms: 
+            <ul>
+                <% for (var i = 0; i < similarTerms.length; i++) { %>
+                    <li><%= similarTerms[i] %></li>
+                <% } %>
+            </ul>
+        </p>
+    </div>
 </body>
 </html>
