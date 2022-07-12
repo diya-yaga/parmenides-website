@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+<body>
+    <h1>Parmenides Search Tool</h1>
+    <form>
+        <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required>
+        <button type="button" onclick="checkButton()"> Submit </button><br><br>
+        <p>I want to find...</p>
+        <input type="radio" id="terms" value="Terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> Terms<br>
+        <input type="radio" id="documents" value="Documents" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Documents<br>
+    </form>
+    
+    <br><br>
+    <div id="term-table" class="invisible">
+        The term was selected
+    </div>
+    <div id="doc-table" class="invisible">
+        The doc was selected
+    </div>
+</body>
+<script>
+    function checkButton() {
+        let userInput = document.getElementById('search-bar').value;
+        if(document.getElementById('terms').checked) {
+            document.getElementById("term-table").classList.remove("invisible");
+            document.getElementById("term-table").innerHTML += userInput;
+        } else {
+            document.getElementById("doc-table").classList.remove("invisible");
+            document.getElementById("doc-table").innerHTML += userInput;
+        }
+    }
+</script>
+</html>

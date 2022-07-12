@@ -1,0 +1,11 @@
+html {
+    margin: 5rem;
+}
+.invisible {
+    visibility: hidden;
+    height: 0;
+}
+
+.invisible-row {
+    display: none;
+}

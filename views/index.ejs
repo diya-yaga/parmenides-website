@@ -1,0 +1,103 @@
+<%- include('partials/header') -%>
+
+<body>
+    <h1>Parmenides Search Tool</h1>
+    <form action="/" method="post">
+        <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
+        <button type="button" onclick="checkButton(); showTables();"> Submit </button><br><br>
+        <p>I want to find...</p>
+        <input type="radio" id="terms" value="Terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> Terms<br>
+        <input type="radio" id="documents" value="Documents" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Documents<br>
+    </form>
+
+    <script>
+        function checkButton() {
+            let userInput = document.getElementById('search-bar').value;
+            if(document.getElementById('terms').checked) {
+                document.getElementById("doc-table").classList.add("invisible");
+                document.getElementById("term-table").classList.remove("invisible");
+    
+            } else {
+                document.getElementById("term-table").classList.add("invisible");
+                document.getElementById("doc-table").classList.remove("invisible");
+    
+            }
+        }
+    </script>
+
+<script>
+    function showTables() {
+        let userInput = document.getElementById('search-bar').value;
+        var tableRowTerms = document.getElementsByClassName('term-tr');
+        var tableDataTerms = document.getElementsByClassName('term-td');
+        for (var i = 0; i < tableRowTerms.length; i++) {
+            if (tableDataTerms[i].innerHTML.trim() != userInput.trim()) {
+                tableRowTerms[i].classList.add("invisible-row");
+            }   
+        };
+    }
+    
+</script>
+    <br><br>
+    <h1 id="temp-show-stuff">
+
+    </h1>
+
+    <div id="term-table" class="invisible">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Content</th>
+                    <th>NLP Phrase</th>
+                    <th>Part of Speech</th>
+                    <th>Term Page</th>
+                </tr>
+            </thead>
+            <% for(var i = 0; i < data.length; i++) { %>
+                <tr class="term-tr">
+                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
+                        <% if (j == 0) { %>
+                            <td>
+                                <%= data[i].split(",")[j].split(":")[1] %>
+                            </td>
+                        <% } else if (j == 2) { %>
+                            <td class='term-td'>
+                                <% var str = data[i].split(",")[j].split(":")[1] %>
+                                <%= str.substring(1, str.length-1) %>
+                            </td>
+                        <% } else if (j == 3) { %>
+                            <td>
+                                <% var str = data[i].split(",")[j].split(":")[1] %>
+                                <%= str.substring(1, str.length-2) %>
+                            </td>
+                        <% } %>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div>
+    <div id="doc-table" class="invisible">
+        <table class="table table-striped">
+            <tr>
+                <th>Document Title</th>
+                <th>Publication Date</th>
+                <th>Authors</th>
+                <th>Term in Document</th>
+            </tr>
+            <% for(var i = 0; i < data.length; i++) { %>
+                <tr>
+                    
+                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
+                        <td>
+                            <%= data[i].split(",")[j].split(":")[1] %>
+                        </td>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div>
+
+</body>
+
+
+</html>

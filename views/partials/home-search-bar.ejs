@@ -1,0 +1,38 @@
+<h1>Parmenides Search Tool</h1>
+<form action="/" method="post">
+    <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
+    <button type="submit" onclick="checkButton(); showTables();"> Submit </button><br><br>
+    <p>I want to find...</p>
+    <input type="radio" id="terms" value="Terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> Terms<br>
+    <input type="radio" id="documents" value="Documents" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Documents<br>
+</form>
+
+<script>
+    function checkButton() {
+        let userInput = document.getElementById('search-bar').value;
+        if(document.getElementById('terms').checked) {
+            document.getElementById("doc-table").classList.add("invisible");
+            document.getElementById("term-table").classList.remove("invisible");
+    
+        } else {
+            document.getElementById("term-table").classList.add("invisible");
+            document.getElementById("doc-table").classList.remove("invisible");
+    
+        };
+    };
+</script>
+
+<script>
+    function showTables() {
+        let userInput = document.getElementById('search-bar').value;
+        var tableRowTerms = document.getElementsByClassName('term-tr');
+        var tableDataTerms = document.getElementsByClassName('term-td');
+
+        for (var i = 0; i < tableRowTerms.length; i++) {
+            if (tableDataTerms[i].innerHTML.trim() != userInput.trim()) {
+                tableRowTerms[i].classList.add("invisible-row");
+            }   
+        };
+    };
+    
+</script>

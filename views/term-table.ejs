@@ -1,0 +1,40 @@
+<%- include('partials/header') -%>
+
+<body>
+    <%- include('partials/home-search-bar') -%>
+
+    <div id="term-table">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Content</th>
+                    <th>NLP Phrase</th>
+                    <th>Part of Speech</th>
+                    <th>Term Page</th>
+                </tr>
+            </thead>
+            <% for(var i = 0; i < data.length; i++) { %>
+                <tr class="term-tr">
+                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
+                        <% if (j == 0) { %>
+                            <td>
+                                <%= data[i].split(",")[j].split(":")[1] %>
+                            </td>
+                        <% } else if (j == 2) { %>
+                            <td class='term-td'>
+                                <% var str = data[i].split(",")[j].split(":")[1] %>
+                                <%= str.substring(1, str.length-1) %>
+                            </td>
+                        <% } else if (j == 3) { %>
+                            <td>
+                                <% var str = data[i].split(",")[j].split(":")[1] %>
+                                <%= str.substring(1, str.length-2) %>
+                            </td>
+                        <% } %>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div>
+</body>
+</html>
