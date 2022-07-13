@@ -16,7 +16,7 @@ const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=
 });
 
 app.get("/", function(req, res) {
-    console.log(req.body.word);
+    console.log("word: "  + req.body.word);
     res.render("index", {
         data: arrOfData
     })
@@ -54,10 +54,10 @@ app.get("/term-in-doc-display", function(req, res) {
 });
 
 app.get("/term-table", function(req, res) {
-    console.log(req.body.word);
     if (req.body.flexRadioDefault == 'Documents') {
         res.redirect("/doc-table");
     }
+    console.log("array: " + arrOfData);
     res.render("term-table", {
         data: arrOfData
     })
@@ -68,6 +68,7 @@ app.get("/doc-table", function(req, res) {
     if (req.body.flexRadioDefault == 'Terms') {
         res.redirect("/term-table");
     }
+    console.log("array: " + arrOfData);
     res.render("doc-table", {
         data: arrOfData
     })
@@ -88,27 +89,25 @@ app.post("/", function(req, res) {
         db.all(sql, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
-                //console.log(JSON.stringify(row));
                 arr.push(JSON.stringify(row));
-            // console.log("array so far: " + arr);
             });       
             callback(arr);
         });
     }
     console.log("arrOfData: " + arrOfData);
-    usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation = '" + req.body.word + "';");
 
 
     if (radioResult == 'Terms') {
+        usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation = '" + req.body.word + "';");
         res.redirect("/term-table");
-    } else {
+    } else if (radioResult == 'Documents') {
+        usingItNow(myCallback, "SELECT document.title AS 'title', document.id AS 'id', term.representation AS 'term', COUNT(term.representation) AS 'num_occurrences_total' FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE sentence.content LIKE '%" + req.body.word + "%' GROUP BY document.title;");
         res.redirect("/doc-table")
     }
     
 });
 
 app.post("/term-table", function(req, res) {
-    
     console.log(10);
 })
 

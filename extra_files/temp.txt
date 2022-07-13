@@ -1,0 +1,36 @@
+<!-- <table>
+        <tr>
+            <th>Subject</th>
+            <th>Object</th>
+            <th>Verb</th>
+        </tr>
+        <% for(var i = 0; i < data.length; i++) { %>
+            <tr>
+                <% for(var j = 0; j < data[i].length; j++) { %>
+                    <td>
+                        <%= data[i][j] %>
+                    </td>
+                <% } %>
+            </tr>
+        <% } %>
+    </table> 
+
+    <ul>
+        <% for(var i = 0; i < data.length; i++) { %>
+            <li><%= data[i] %></li>
+        <% } %>
+    </ul> -->
+
+
+
+    
+function contentPartOfSpeech() {
+    let sql = "SELECT subject.representation AS \"subject\", verb.representation AS \"verb\", object.representation AS \"object\" FROM term AS root JOIN term AS subject ON root.dep_id = subject.id JOIN term AS predicate ON root.head_id = predicate.id JOIN term AS object ON predicate.dep_id = object.id JOIN term AS verb on predicate.head_id = verb.id WHERE predicate.rel = 'dobj' AND root.pos = 'VERB';";
+    db.each(sql, (err, row) => {
+        if (err) return console.error(err.message);
+        var s = new String(row.subject);
+        console.log(s);
+        
+    });
+
+}

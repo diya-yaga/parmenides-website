@@ -1,0 +1,27 @@
+<script>
+    function checkButton() {
+        let userInput = document.getElementById('search-bar').value;
+        if(document.getElementById('terms').checked) {
+            document.getElementById("doc-table").classList.add("invisible");
+            document.getElementById("term-table").classList.remove("invisible");
+    
+        } else {
+            document.getElementById("term-table").classList.add("invisible");
+            document.getElementById("doc-table").classList.remove("invisible");
+    
+        };
+    };
+
+    function showTables() {
+        let userInput = document.getElementById('search-bar').value;
+        var tableRowTerms = document.getElementsByClassName('term-tr');
+        var tableDataTerms = document.getElementsByClassName('term-td');
+
+        for (var i = 0; i < tableRowTerms.length; i++) {
+            if (tableDataTerms[i].innerHTML.trim() != userInput.trim()) {
+                tableRowTerms[i].classList.add("invisible-row");
+            }   
+        };
+    };
+    
+</script>

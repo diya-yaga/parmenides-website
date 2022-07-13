@@ -1,8 +1,16 @@
 <%- include('partials/header') -%>
 
 <body>
-    <%- include('partials/home-search-bar') -%>
-
+    <%- include('partials/search-bar-js') -%>
+    <h1>Parmenides Search Tool</h1>
+    <form action="/" method="post">
+        <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
+        <button type="submit" onclick="checkButton(); showTables();"> Submit </button><br><br>
+        <p>I want to find...</p>
+        <input type="radio" value="Terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> Terms<br>
+        <input type="radio" value="Documents" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Documents<br>
+    </form>
+    <br>
     <div id="term-table">
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
