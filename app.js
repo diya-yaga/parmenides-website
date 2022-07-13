@@ -55,7 +55,20 @@ app.get("/term-in-doc-display", function(req, res) {
 
 app.get("/term-table", function(req, res) {
     console.log(req.body.word);
+    if (req.body.flexRadioDefault == 'Documents') {
+        res.redirect("/doc-table");
+    }
     res.render("term-table", {
+        data: arrOfData
+    })
+});
+
+app.get("/doc-table", function(req, res) {
+    console.log(req.body.word);
+    if (req.body.flexRadioDefault == 'Terms') {
+        res.redirect("/term-table");
+    }
+    res.render("doc-table", {
         data: arrOfData
     })
 });
@@ -89,12 +102,17 @@ app.post("/", function(req, res) {
     if (radioResult == 'Terms') {
         res.redirect("/term-table");
     } else {
-        res.redirect("/doc-display")
+        res.redirect("/doc-table")
     }
     
 });
 
 app.post("/term-table", function(req, res) {
+    
+    console.log(10);
+})
+
+app.post("/doc-table", function(req, res) {
     
     console.log(10);
 })

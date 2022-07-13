@@ -1,0 +1,27 @@
+<%- include('partials/header') -%>
+
+<body>
+    <%- include('partials/home-search-bar') -%>
+
+    <div id="doc-table">
+        <table class="table table-bordered table-hover">
+            <tr>
+                <th>Document Title</th>
+                <th>Publication Date</th>
+                <th>Authors</th>
+                <th>Term in Document</th>
+            </tr>
+            <% for(var i = 0; i < data.length; i++) { %>
+                <tr>
+                    
+                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
+                        <td>
+                            <%= data[i].split(",")[j].split(":")[1] %>
+                        </td>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div>
+</body>
+</html>
