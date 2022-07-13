@@ -19,3 +19,7 @@ td, th {
     outline: 1px solid;
     padding: 1rem;
 }
+
+.label {
+    font-weight: bold;
+}

@@ -1,36 +1,54 @@
-<!-- <table>
-        <tr>
-            <th>Subject</th>
-            <th>Object</th>
-            <th>Verb</th>
-        </tr>
-        <% for(var i = 0; i < data.length; i++) { %>
+<!-- 
+    <div id="term-table" class="invisible">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Content</th>
+                    <th>NLP Phrase</th>
+                    <th>Part of Speech</th>
+                    <th>Term Page</th>
+                </tr>
+            </thead>
+            <% for(var i = 0; i < data.length; i++) { %>
+                <tr class="term-tr">
+                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
+                        <% if (j == 0) { %>
+                            <td>
+                                <%= data[i].split(",")[j].split(":")[1] %>
+                            </td>
+                        <% } else if (j == 2) { %>
+                            <td class='term-td'>
+                                <% var str = data[i].split(",")[j].split(":")[1] %>
+                                <%= str.substring(1, str.length-1) %>
+                            </td>
+                        <% } else if (j == 3) { %>
+                            <td>
+                                <% var str = data[i].split(",")[j].split(":")[1] %>
+                                <%= str.substring(1, str.length-2) %>
+                            </td>
+                        <% } %>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div>
+    <div id="doc-table" class="invisible">
+        <table class="table table-bordered table-hover">
             <tr>
-                <% for(var j = 0; j < data[i].length; j++) { %>
-                    <td>
-                        <%= data[i][j] %>
-                    </td>
-                <% } %>
+                <th>Document Title</th>
+                <th>Publication Date</th>
+                <th>Authors</th>
+                <th>Term in Document</th>
             </tr>
-        <% } %>
-    </table> 
-
-    <ul>
-        <% for(var i = 0; i < data.length; i++) { %>
-            <li><%= data[i] %></li>
-        <% } %>
-    </ul> -->
-
-
-
-    
-function contentPartOfSpeech() {
-    let sql = "SELECT subject.representation AS \"subject\", verb.representation AS \"verb\", object.representation AS \"object\" FROM term AS root JOIN term AS subject ON root.dep_id = subject.id JOIN term AS predicate ON root.head_id = predicate.id JOIN term AS object ON predicate.dep_id = object.id JOIN term AS verb on predicate.head_id = verb.id WHERE predicate.rel = 'dobj' AND root.pos = 'VERB';";
-    db.each(sql, (err, row) => {
-        if (err) return console.error(err.message);
-        var s = new String(row.subject);
-        console.log(s);
-        
-    });
-
-}
+            <% for(var i = 0; i < data.length; i++) { %>
+                <tr>
+                    
+                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
+                        <td>
+                            <%= data[i].split(",")[j].split(":")[1] %>
+                        </td>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div> -->

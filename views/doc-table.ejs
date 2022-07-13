@@ -13,12 +13,12 @@
     <br>
     <div id="doc-table">
         <table class="table table-bordered table-hover">
-            <tr>
+            <thead class="table-light">
                 <th>Document Title</th>
                 <th>Publication Date</th>
                 <th>Authors</th>
                 <th>Term in Document</th>
-            </tr>
+            </thead>
             <% for(var i = 0; i < data.length; i++) { %>
                 <tr>
                     <% for(var j = 0; j < data[i].split(",").length; j++) { %>

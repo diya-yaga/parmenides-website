@@ -1,16 +1,15 @@
 <%- include('partials/header') -%>
 <body>
     <h1>Parmenides</h1>
-    <h2>Term: <span style="text-decoration-line:underline"><%= term %></span></h2>
     <br>
     <div class="term-data-1">
-        <p>Normalized representation: <%= normRep %></p>
-        <p>Part of Speech tag: <%= posTag %></p>
-        <p>REI: <%= rei %></p>
-        <p>HEAD: <%= head %></p>
-        <p>DEP: <%= dep %></p>
+        <p><span class="label">Normalized representation:</span> <%= data[0].substring(30, data[0].length-1) %></p>
+        <p><span class="label">Part of Speech tag: </span><%= data[1].substring(7, data[1].length-1) %></p>
+        <p><span class="label">REL: </span><%= data[2].substring(7, data[2].length-1) %></p>
+        <p><span class="label">HEAD: </span><%= data[3].substring(8, data[3].length-1) %></p>
+        <p><span class="label">DEP: </span><%= data[4].substring(7, data[4].length-1) %></p>
         <br>
-        <p>NLP phrases: <%= nlpPhrases %></p>
+        <p><span class="label">NLP phrases:</span> <%= data[5].substring(15, data[5].length-2) %></p>
     </div>
     <br>
     <div class="term-data-2">
