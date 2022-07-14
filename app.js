@@ -16,26 +16,75 @@ const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=
 });
 
 app.get("/", function(req, res) {
+    
     res.render("index", {
         data: tableArr
     });
     
 });
 
-app.get("/termindoc/:givenDoc", function(req, res) {
+app.get("/termindoc/:term/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
-    res.render('term-in-doc-display', {
-        term: 'document',
-        docTitle: 'Document 4',
-        url: '/term/',
-        content: 'This is the fourth document.'
-    });
+    var term = req.params.term;
+    
+
+    function allDone(callback) {
+        console.log("all done!");
+        callback();
+    }
+    
+    function getDocContent(callback) {
+        var sentences = [];
+        var sql1 = "SELECT sentence.content FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE document.id = '" + docID + "' GROUP BY sentence.content;";
+        db.all(sql1, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                sentences.push(JSON.stringify(row));
+            
+            });   
+            callback(sentences);    
+        });
+    }
+    
+    function getDocInfo (callback) {
+        var arr = [];
+        var sql2 = "SELECT document.title, document.id FROM document WHERE document.id = '" + docID + "';"; 
+        db.all(sql2, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                arr.push(JSON.stringify(row));
+            
+            });
+            callback(arr);   
+        });
+        
+    }
+
+    function runQueriesInOrder(callback) {
+        getDocInfo(function(docInfo) {
+            getDocContent(function(docContent) {
+                res.render('term-in-doc-display', {
+                    term: term,
+                    docTitle: docInfo,
+                    url: '/docs/' + docID,
+                    content: docContent
+                });
+                allDone(callback);
+            })
+        })
+    }
+    
+    runQueriesInOrder(function() {
+        console.log('finished!');
+    })
 })
 
-app.get("/doc-display", function(req, res) {
+app.get("/docs/:givenDoc", function(req, res) {
+    var docID = req.params.givenDoc;
+
     res.render("doc-display", {
         docTitle: 'docTitle',
-        uniqueID: 'uniqueID',
+        uniqueID: docID,
         pubDate: 'pubDate',
         authors: ['steve', 'bob', 'joe'],
         metadata: [1, 2, 3, 4, 5]
@@ -179,7 +228,7 @@ app.post("/", function(req, res) {
             if (err) return callback(err.message);
             rows.forEach((row) => {
                 arr.push(JSON.stringify(row));
-            });       
+            }); 
             callback(arr);
         });
     }
@@ -189,7 +238,7 @@ app.post("/", function(req, res) {
         usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation LIKE '%" + req.body.word + "%';");
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
-        usingItNow(myCallback, "SELECT document.title AS 'title', document.id AS 'id', term.representation AS 'term', COUNT(term.representation) AS 'num_occurrences_total' FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE sentence.content LIKE '%" + req.body.word + "%' GROUP BY document.title;");
+        usingItNow(myCallback, "SELECT document.title AS 'title', document.id AS 'id', term.representation AS 'term', COUNT(term.representation) AS 'num_occurrences_total' FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE sentence.content LIKE '%" + req.body.word + "%' AND term.representation = '" + req.body.word + "' GROUP BY document.title;");
         res.redirect("/doc-table")
     }
     
