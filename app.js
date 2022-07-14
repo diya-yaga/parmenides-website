@@ -93,9 +93,22 @@ app.get("/terms/:givenTerm", function(req, res) {
     }
 
     function getNLPPhrases (callback) {
-        var simTerms = [];
+        var nlpPhrases = [];
         var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
         db.all(sql3, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                nlpPhrases.push(JSON.stringify(row));
+            });
+            console.log(nlpPhrases);
+            callback(nlpPhrases);
+        });
+    }
+
+    function getSimilarTerms (callback) {
+        var simTerms = [];
+        var sql4 = "SELECT term.id, term.representation FROM term WHERE term.representation = (SELECT term.representation FROM term WHERE term.id = '" + termID + "') AND term.id != '" + termID + "';";
+        db.all(sql4, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
                 simTerms.push(JSON.stringify(row));
@@ -109,28 +122,31 @@ app.get("/terms/:givenTerm", function(req, res) {
         getHyponyms(function(hypoData) {
             getTermInfo(function(termData) {
                 getNLPPhrases(function(nlpPhraseData) {
+                    getSimilarTerms(function(simTermData) {
                     var pieces = [];
                     for (var i = 0; i < termData.length; i++) {
                         pieces.push(termData[i].split('","'));
                     }
-                    //console.log(pieces);
+                    
                     var hyponymArr = [];
                     for (var i = 0; i < hypoData.length; i++) {
                     hyponymArr.push(hypoData[i].split('","')) 
                     }
 
-                    for (var i = 0; i < nlpPhraseData.length; i++) {
-                        console.log("item: " + nlpPhraseData[i]);
+                    var simTermsArr = [];
+                    for (var i = 0; i < simTermData.length; i++) {
+                        simTermsArr.push(simTermData[i].split('","'))
                     }
                     
                     res.render("term-display", {
                         data: pieces[0],
                         nlpPhrase: nlpPhraseData,
                         hyponyms: hyponymArr,
-                        similarTerms: [1,2,3,4,5]
+                        similarTerms: simTermsArr
                 
                     });
                     allDone(callback);
+                    })
                 })
             })
         })

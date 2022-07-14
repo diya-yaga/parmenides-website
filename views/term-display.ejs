@@ -32,7 +32,7 @@
             </p>
         <% } %>
         <p>
-            <span class="label">Hyponym: </span> 
+            <span class="label">Hyponyms: </span> 
             <ul>
                 <% for (var i = 0; i < hyponyms.length; i++) { %>
                     <li>
@@ -43,10 +43,13 @@
             </ul>
             
         </p>
-        <p>Similar terms: 
+        <p><span class="label">Similar terms: </span>
             <ul>
                 <% for (var i = 0; i < similarTerms.length; i++) { %>
-                    <li><%= similarTerms[i] %></li>
+                    <li>
+                        <% var url = "/terms/" + similarTerms[i][0].substring(7) %>
+                        <a href= <%= url %> > <%= similarTerms[i][1].substring(17,similarTerms[i][1].length-2)%> </a>
+                    </li>
                 <% } %>
             </ul>
         </p>
