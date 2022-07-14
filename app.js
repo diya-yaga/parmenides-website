@@ -6,7 +6,6 @@ const sqlite3 = require("sqlite3");
 const app = express();
 
 let tableArr = [];
-let termArr = [];
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -41,7 +40,7 @@ app.get("/term-table", function(req, res) {
     if (req.body.flexRadioDefault == 'Documents') {
         res.redirect("/doc-table");
     }
-    //console.log("array: " + arrOfData);
+    
     res.render("term-table", {
         data: tableArr
     })
@@ -52,7 +51,7 @@ app.get("/doc-table", function(req, res) {
     if (req.body.flexRadioDefault == 'Terms') {
         res.redirect("/term-table");
     }
-    //console.log("array: " + arrOfData);
+    
     res.render("doc-table", {
         data: tableArr
     })
@@ -60,36 +59,86 @@ app.get("/doc-table", function(req, res) {
 
 app.get("/terms/:givenTerm", function(req, res) {
     var termID = req.params.givenTerm;
-    var myCallback = function(data) {
-        console.log('got data: ' + data);
-        var info = data[0];
-        console.log("word info: " + info);
-        var pieces = info.split(",");
 
-        res.render("term-display", {
-            data: pieces,
-            hypernym: 'hypernym',
-            hyponyms: [1, 2, 3, 4, 5],
-            similarTerms: [1,2,3,4,5]
-    
-        });
-        
-        
+    function allDone(callback) {
+        console.log("all done!");
+        callback();
     }
-    console.log(termArr);
-    var usingItNow = function(callback, sql) {
+    
+    function getTermInfo(callback) {
         var arr = [];
-        db.all(sql, [], (err, rows) => {
+        var sql1 = "SELECT tempTerm.representation AS normalized_representation, tempTerm.pos, IFNULL(tempTerm.rel, '<none>') AS rel, IFNULL(tempHead.representation, '<none>') AS head, IFNULL(tempDep.representation, '<none>') AS dep, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, IFNULL(tempHead.representation, 'none') AS hypernym, tempDep.id AS dep_id, tempDep.representation AS dep_rep FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempTerm.id = '" + termID + "' ORDER BY normalized_representation;";
+        db.all(sql1, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
                 arr.push(JSON.stringify(row));
+            
             });   
-            callback(arr);
+            callback(arr);    
+        });
+    }
+    
+    function getHyponyms (callback) {
+        var hyponyms = [];
+        var sql2 = "SELECT tempHead.id AS head_id, tempTerm.id AS hyponym_id, tempTerm.representation AS hyponym_rep FROM term tempTerm LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempHead.id = '" + termID + "';"; 
+        db.all(sql2, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                hyponyms.push(JSON.stringify(row));
+            
+            });
+            callback(hyponyms);   
         });
         
     }
+
+    function getNLPPhrases (callback) {
+        var simTerms = [];
+        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
+        db.all(sql3, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                simTerms.push(JSON.stringify(row));
+            });
+            console.log(simTerms);
+            callback(simTerms);
+        });
+    }
     
-    usingItNow(myCallback, "SELECT tempTerm.representation AS normalized_representation, tempTerm.pos, IFNULL(tempTerm.rel, '<none>') AS rel, IFNULL(tempHead.representation, '<none>') AS head, IFNULL(tempDep.representation, '<none>') AS dep, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, tempHead.id AS head_id FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempTerm.id = '" + termID + "' ORDER BY normalized_representation;");
+    function runQueriesInOrder(callback) {
+        getHyponyms(function(hypoData) {
+            getTermInfo(function(termData) {
+                getNLPPhrases(function(nlpPhraseData) {
+                    var pieces = [];
+                    for (var i = 0; i < termData.length; i++) {
+                        pieces.push(termData[i].split('","'));
+                    }
+                    //console.log(pieces);
+                    var hyponymArr = [];
+                    for (var i = 0; i < hypoData.length; i++) {
+                    hyponymArr.push(hypoData[i].split('","')) 
+                    }
+
+                    for (var i = 0; i < nlpPhraseData.length; i++) {
+                        console.log("item: " + nlpPhraseData[i]);
+                    }
+                    
+                    res.render("term-display", {
+                        data: pieces[0],
+                        nlpPhrase: nlpPhraseData,
+                        hyponyms: hyponymArr,
+                        similarTerms: [1,2,3,4,5]
+                
+                    });
+                    allDone(callback);
+                })
+            })
+        })
+    }
+    
+    runQueriesInOrder(function() {
+        console.log('finished!');
+    })
 })
 
 
