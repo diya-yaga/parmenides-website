@@ -21,10 +21,22 @@
             </thead>
             <% for(var i = 0; i < data.length; i++) { %>
                 <tr>
-                    <% for(var j = 0; j < data[i].split(",").length; j++) { %>
-                        <td>
-                            <%= data[i].split(",")[j].split(":")[1] %>
-                        </td>
+                    <% var parts = data[i].split('","'); %>
+                    <% for(var j = 0; j < parts.length; j++) { %>
+                        <% if (j === 0) { %>
+                            <td>
+                                <%= parts[j].split(":")[1].substring(1) %>
+                            </td>
+                        <% } else if (j === 3) { %>
+                            <td>
+                                <% var id = parts[1].split(":")[1].substring(1)%>
+                                <% var url = "/termindoc/" + id%>
+                                <a href=<%= url %>>Doc Page</a>
+                            </td>
+                        <% } else { %>
+                            <td></td>
+                        <% } %>
+                        
                     <% } %>
                 </tr>
             <% } %>

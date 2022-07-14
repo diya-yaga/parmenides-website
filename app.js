@@ -18,9 +18,19 @@ const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=
 app.get("/", function(req, res) {
     res.render("index", {
         data: tableArr
-    })
+    });
     
 });
+
+app.get("/termindoc/:givenDoc", function(req, res) {
+    var docID = req.params.givenDoc;
+    res.render('term-in-doc-display', {
+        term: 'document',
+        docTitle: 'Document 4',
+        url: '/term/',
+        content: 'This is the fourth document.'
+    });
+})
 
 app.get("/doc-display", function(req, res) {
     res.render("doc-display", {
@@ -30,10 +40,6 @@ app.get("/doc-display", function(req, res) {
         authors: ['steve', 'bob', 'joe'],
         metadata: [1, 2, 3, 4, 5]
     });
-});
-
-app.get("/term-in-doc-display", function(req, res) {
-    res.render("term-in-doc-display");
 });
 
 app.get("/term-table", function(req, res) {
