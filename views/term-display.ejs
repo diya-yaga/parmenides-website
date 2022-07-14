@@ -9,11 +9,20 @@
         <p><span class="label">HEAD: </span><%= data[3].substring(8, data[3].length-1) %></p>
         <p><span class="label">DEP: </span><%= data[4].substring(7, data[4].length-1) %></p>
         <br>
-        <p><span class="label">NLP phrases:</span> <%= data[5].substring(15, data[5].length-2) %></p>
+        <p><span class="label">NLP phrases:</span> <%= data[5].substring(15, data[5].length-1) %></p>
     </div>
     <br>
     <div class="term-data-2">
-        <p>Hypernym: <%= hypernym %></p>
+        <% var hypernymID = data[6].substring(10, data[6].length-1) %>
+        <% if (hypernymID === 'null') { %>
+            <p><span class="label">Hypernym: </span>none</p>
+        <% } else { %>
+            <% var url = "/terms/" + hypernymID.substring(1, hypernymID.length-1) %>
+            <p>
+                <span class="label">Hypernym: </span>
+                <a href= <%= url %> > <%= data[3].substring(8, data[3].length-1) %> </a>
+            </p>
+        <% } %>
         <p>Hyponyms: 
             <ul>
                 <% for (var i = 0; i < hyponyms.length; i++) { %>

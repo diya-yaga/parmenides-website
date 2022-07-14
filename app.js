@@ -60,7 +60,7 @@ app.get("/doc-table", function(req, res) {
 
 app.get("/terms/:givenTerm", function(req, res) {
     var termID = req.params.givenTerm;
-    var myCallback2 = function(data) {
+    var myCallback = function(data) {
         console.log('got data: ' + data);
         var info = data[0];
         console.log("word info: " + info);
@@ -77,7 +77,7 @@ app.get("/terms/:givenTerm", function(req, res) {
         
     }
     console.log(termArr);
-    var usingItNow2 = function(callback, sql) {
+    var usingItNow = function(callback, sql) {
         var arr = [];
         db.all(sql, [], (err, rows) => {
             if (err) return callback(err.message);
@@ -89,26 +89,9 @@ app.get("/terms/:givenTerm", function(req, res) {
         
     }
     
-    usingItNow2(myCallback2, "SELECT tempTerm.representation AS normalized_representation, tempTerm.pos, IFNULL(tempTerm.rel, '<none>') AS rel, IFNULL(tempHead.representation, '<none>') AS head, IFNULL(tempDep.representation, '<none>') AS dep, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempTerm.id = '" + termID + "' ORDER BY normalized_representation;");
-    
-    
-    // res.render("term-display", {
-    //     normRep: termArr[0],
-    //     posTag: termArr[1],
-    //     rei: termArr[2],
-    //     head: termArr[3],
-    //     dep: termArr[4],
-    //     nlpPhrases: 'hello there',
-    //     hypernym: 'hypernym',
-    //     hyponyms: [1, 2, 3, 4, 5],
-    //     similarTerms: [1,2,3,4,5]
-
-    // });
+    usingItNow(myCallback, "SELECT tempTerm.representation AS normalized_representation, tempTerm.pos, IFNULL(tempTerm.rel, '<none>') AS rel, IFNULL(tempHead.representation, '<none>') AS head, IFNULL(tempDep.representation, '<none>') AS dep, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, tempHead.id AS head_id FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempTerm.id = '" + termID + "' ORDER BY normalized_representation;");
 })
 
-// app.post("/terms/:givenTerm", function(req, res) {
-//     res.redirect("/terms/:givenTerm");
-// })
 
 app.post("/", function(req, res) {
     
