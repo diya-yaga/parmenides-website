@@ -20,6 +20,64 @@
             </ul>
         </p>
     </div>
+    <br>
+    <div class="addtl-search">
+        <form method="post">
+            <input type="radio" id="allTerms" value="list_all_terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> List All Terms<br>
+            <input type="radio" id="searchForTerm" value="search_for_a_term" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Search For A Term<br><br>
+            <button type="button" onclick="checkButton()">Submit</button>
+        </form>
+    </div>
+    <br>
+    <div id="allTermsTable" class="invisible">
+        <table  class="table table-bordered table-hover">
+            <thead class="table-light">
+                <th>Term</th>
+                <th>NLP Phrase</th>
+                <th>REL</th>
+                <th>POS</th>
+                <th>Term Page</th>
+            </thead>
+            <% for (var i = 0; i < arr.length; i++) { %>
+                <% var midArr = arr[i].split('","') %>
+                <tr>
+                    <% for (var j = 0; j < midArr.length; j++) { %>
+                        <% var data = midArr[j].split('":"')[1]%>
+                        <% if (j != 4) { %>
+                            <td><%= data %></td>
+                        <% } else { %>
+                            <% var url = "/terms/" + data.substring(0,data.length-2) %>
+                            <td>
+                                <a href= <%= url %>>Term Page</a>
+                            </td>
+                        <% } %>
+                        
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+    </div>
+
+    <div id="searchForTermTable" class="invisible">
+        <form>
+            <input type="text" id="termSearchBar" placeholder="Enter search term">
+            <button type="button">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        function checkButton() {
+            if(document.getElementById('allTerms').checked) {
+                document.getElementById("searchForTermTable").classList.add("invisible");
+                document.getElementById("allTermsTable").classList.remove("invisible");
+    
+            } else {
+                document.getElementById("allTermsTable").classList.add("invisible");
+                document.getElementById("searchForTermTable").classList.remove("invisible");
+    
+            }
+        }
+    </script>
 
 </body>
 </html>

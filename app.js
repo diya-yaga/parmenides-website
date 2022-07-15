@@ -6,6 +6,7 @@ const sqlite3 = require("sqlite3");
 const app = express();
 
 let tableArr = [];
+let radioResult = 0;
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -16,7 +17,6 @@ const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=
 });
 
 app.get("/", function(req, res) {
-    
     res.render("index", {
         data: tableArr
     });
@@ -27,7 +27,6 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
     var term = req.params.term;
     
-
     function allDone(callback) {
         console.log("all done!");
         callback();
@@ -82,14 +81,60 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
 app.get("/docs/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
 
-    res.render("doc-display", {
-        docTitle: 'docTitle',
-        uniqueID: docID,
-        pubDate: 'pubDate',
-        authors: ['steve', 'bob', 'joe'],
-        metadata: [1, 2, 3, 4, 5]
-    });
+    function allDone(callback) {
+        console.log("all done!");
+        callback();
+    }
+    
+    function getAllTerms(callback) {
+        var terms = [];
+        var sql1 = "SELECT term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, IFNULL(term.rel, 'null') AS 'rel', term.pos, term.id FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id WHERE document.id = '" + docID + "';";
+        db.all(sql1, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                terms.push(JSON.stringify(row));
+            
+            });   
+            callback(terms);    
+        });
+    }
+    
+    function getDocInfo (callback) {
+        var arr = [];
+        var sql2 = "SELECT document.title, document.id FROM document WHERE document.id = '" + docID + "';"; 
+        db.all(sql2, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                arr.push(JSON.stringify(row));
+            
+            });
+            callback(arr);   
+        });
+        
+    }
+
+    function runQueriesInOrder(callback) {
+        getDocInfo(function(docInfo) {
+            getAllTerms(function(terms) {
+                res.render("doc-display", {
+                    docTitle: 'title',
+                    uniqueID: docID,
+                    pubDate: 'pubDate',
+                    authors: ['steve', 'bob', 'joe'],
+                    metadata: [1, 2, 3, 4, 5],
+                    arr: terms,
+                    radioRes: radioResult
+                });
+                allDone(callback);
+            })
+        })
+    }
+    
+    runQueriesInOrder(function() {
+        console.log('finished!');
+    })
 });
+
 
 app.get("/term-table", function(req, res) {
     if (req.body.flexRadioDefault == 'Documents') {
