@@ -2,16 +2,34 @@
 <body>
     <h1>Parmenides</h1>
     <% termURL = "/terms/" + termID.substring(7,termID.length-2) %>
-    <h3>Term: <a href=<%= termURL %>><%= term %></a></h3>
+    <h3>Term: 
+        <a href=<%= termURL %>>
+            <span id="term">
+                <%= term %>
+            </span>
+        </a>
+    </h3>
     <h3>Document title: 
         <%= docTitle[0].split('","')[0].substring(10) %>
     </h3>
     <h3><a href= <%= docUrl %> >Link to document</a></h3>
     <br>
-    <p style="outline: 1px;">
-        <% for (var i = 0; i < content.length; i++) { %>
-            <%= content[i].substring(12, content[i].length-2) %> 
-        <% } %>
-    </p>
+    <div style="outline: 1px; outline-style: solid; padding: 1rem;" >
+        <p id="documentContent">
+            <% let passage = "" %>
+            <% for (var i = 0; i < content.length; i++) { %>
+                <% var str = content[i].substring(12, content[i].length-2) %> 
+                <% passage += str %>
+            <% } %>
+            <%= passage %>
+        </p>
+    </div>
+    <script>
+        let str = document.getElementById("documentContent").innerHTML;
+        var term = document.getElementById('term').innerHTML.trim();
+        var sRegExInput = new RegExp(term, "g");
+        var res = str.replace(sRegExInput, "<span class='highlight'>" + term + "</span>");
+        document.getElementById("documentContent").innerHTML = res;
+    </script>
 </body>
 </html>
