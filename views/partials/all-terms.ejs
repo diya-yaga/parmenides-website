@@ -1,0 +1,28 @@
+<div id="allTermsTable" class="invisible">
+    <table  class="table table-bordered table-hover">
+        <thead class="table-light">
+            <th>Term</th>
+            <th>NLP Phrase</th>
+            <th>REL</th>
+            <th>POS</th>
+            <th>Term Page</th>
+        </thead>
+        <% for (var i = 0; i < arr.length; i++) { %>
+            <% var midArr = arr[i].split('","') %>
+            <tr>
+                <% for (var j = 0; j < midArr.length; j++) { %>
+                    <% var data = midArr[j].split('":"')[1]%>
+                    <% if (j != 4) { %>
+                        <td><%= data %></td>
+                    <% } else { %>
+                        <% var url = "/terms/" + data.substring(0,data.length-2) %>
+                        <td>
+                            <a href= <%= url %>>Term Page</a>
+                        </td>
+                    <% } %>
+                    
+                <% } %>
+            </tr>
+        <% } %>
+    </table>
+</div>

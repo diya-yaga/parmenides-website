@@ -59,16 +59,32 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
         
     }
 
+    function getTermID(callback) {
+        var ids = [];
+        var sql3 = "SELECT term.id FROM term WHERE term.representation='" + term + "';";
+        db.all(sql3, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                ids.push(JSON.stringify(row));
+            
+            });
+            callback(ids);   
+        });
+    }
+
     function runQueriesInOrder(callback) {
         getDocInfo(function(docInfo) {
             getDocContent(function(docContent) {
-                res.render('term-in-doc-display', {
-                    term: term,
-                    docTitle: docInfo,
-                    url: '/docs/' + docID,
-                    content: docContent
-                });
-                allDone(callback);
+                getTermID(function(termID) {
+                    res.render('term-in-doc-display', {
+                        term: term,
+                        termID: termID[0],
+                        docTitle: docInfo,
+                        docUrl: '/docs/' + docID,
+                        content: docContent
+                    });
+                    allDone(callback);
+                })
             })
         })
     }
@@ -78,8 +94,11 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
     })
 })
 
+
 app.get("/docs/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
+    radioResult = req.body.flexRadioDefault;
+    console.log(radioResult);
 
     function allDone(callback) {
         console.log("all done!");
@@ -88,7 +107,7 @@ app.get("/docs/:givenDoc", function(req, res) {
     
     function getAllTerms(callback) {
         var terms = [];
-        var sql1 = "SELECT term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, IFNULL(term.rel, 'null') AS 'rel', term.pos, term.id FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id WHERE document.id = '" + docID + "';";
+        var sql1 = "SELECT term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, IFNULL(term.rel, 'null') AS 'rel', term.pos, term.id FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id WHERE document.id = '" + docID + "' ORDER BY term.representation;";
         db.all(sql1, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
@@ -123,7 +142,7 @@ app.get("/docs/:givenDoc", function(req, res) {
                     authors: ['steve', 'bob', 'joe'],
                     metadata: [1, 2, 3, 4, 5],
                     arr: terms,
-                    radioRes: radioResult
+                    partial2: 'temp-partial2'
                 });
                 allDone(callback);
             })

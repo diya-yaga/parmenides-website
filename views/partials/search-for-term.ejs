@@ -1,0 +1,14 @@
+<div id="searchForTermTable" class="invisible">
+    <form>
+        <input type="text" id="termSearchBar" placeholder="Enter search term">
+        <button type="button" onclick="searchForTerm()">Submit</button>
+    </form>
+    <h1 id="givenTermPrint"></h1>
+</div>
+
+<script>
+    function searchForTerm() {
+        let userInput = document.getElementById('termSearchBar').value;
+        document.getElementById('givenTermPrint').innerHTML = userInput;
+    }
+</script>
