@@ -19,7 +19,7 @@
             <% let passage = "" %>
             <% for (var i = 0; i < content.length; i++) { %>
                 <% var str = content[i].substring(12, content[i].length-2) %> 
-                <% passage += str %>
+                <% passage += str + ' ' %>
             <% } %>
             <%= passage %>
         </p>
@@ -27,9 +27,33 @@
     <script>
         let str = document.getElementById("documentContent").innerHTML;
         var term = document.getElementById('term').innerHTML.trim();
-        var sRegExInput = new RegExp(term, "g");
-        var res = str.replace(sRegExInput, "<span class='highlight'>" + term + "</span>");
+        var term2 = "";
+        var sRegExInput = new RegExp(term, "gi");
+        var res = str.replace(sRegExInput, function(match) {
+            term2 = matchCase(term, match)
+            return "<span class='highlight'>" + term2 + "</span>"
+        });
+
         document.getElementById("documentContent").innerHTML = res;
+
+        document.getElementById('term').innerHTML = term2;
+
+        function matchCase(text, pattern) {
+            var result = '';
+
+            for(var i = 0; i < text.length; i++) {
+                var c = text.charAt(i);
+                var p = pattern.charCodeAt(i);
+
+                if(p >= 65 && p < 65 + 26) {
+                    result += c.toUpperCase();
+                } else {
+                    result += c.toLowerCase();
+                }
+            }
+
+            return result;
+        }
     </script>
 </body>
 </html>
