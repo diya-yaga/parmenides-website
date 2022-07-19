@@ -2,25 +2,50 @@
 <body>
     <h1>Parmenides</h1>
     <div class="doc-data">
-        <p>Document Title: <%= docTitle %></p>
-        <p>Unique ID: <%= uniqueID %></p>
-        <p>Publication Date: <%= pubDate %></p>
-        <p>Authors: 
-            <ul>
-                <% for (var i = 0; i < authors.length; i++) { %>
-                    <li><%= authors[i] %></li>
-                <% } %>
-            </ul>
-        </p>
-        <p>Metadata Attributes: 
-            <ul>
-                <% for (var i = 0; i < metadata.length; i++) { %>
-                    <li><%= metadata[i] %></li>
-                <% } %>
-            </ul>
-        </p>
+        <p><span class="label">Document Title:</span> <%= docInfo[0].substring(10,docInfo[0].length) %></p>
+        <p><span class="label">Unique ID:</span> <%= docInfo[1].substring(5,docInfo[1].length-2) %></p>
+
+        <% var pubDate = '' %>
+        <% var authors = '' %>
+        <% for (var i = 0; i < metadata.length; i++) { %>
+            <% var row = metadata[i].split('","') %>
+            <% if (row[0].split('":"')[1] == 'pubDate') { %>
+                <% pubDate = row[1].split('":"')[1].substring(0, row[1].split('":"')[1].length-2)%>
+            <% } else if (row[0].split('":"')[1] == 'authors') { %>
+                <% authors = row[1].split('":"')[1].substring(0, row[1].split('":"')[1].length-2)%>
+            <% } %>
+        <% } %>
+
+        <p><span class="label">Publication Date:</span> <%= pubDate %></p>
+
+        <% if (authors.split(' and ').length > 1) { %>
+            <p><span class="label">Authors:</span> <%= authors %></p>
+        <% } else { %>
+            <p><span class="label">Author:</span> <%= authors %></p>
+        <% } %>
+        
+        <p><span class="label">Metadata Attributes:</span></p>
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <th>Category</th>
+                <th>Value</th>
+            </thead>
+            <% for (var i = 0; i < metadata.length; i++) { %>
+                <tr>
+                    <% var key = metadata[i].split('","')[0].substring(8) %>
+                    <% var value = metadata[i].split('","')[1].substring(8, metadata[i].split('","')[1].length-2) %>
+                    <% if (key != 'authors' && key != 'pubDate') { %>
+                        <td><%= key %></td>
+                        <td><%= value %></td>
+                    <% } %>
+                </tr>
+            <% } %>
+        </table>
+        
     </div>
+
     <br>
+
     <div class="addtl-search">
         <form>
             <input type="radio" id="allTerms" value="list_all_terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> List All Terms<br>

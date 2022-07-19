@@ -98,7 +98,6 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
 app.get("/docs/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
     radioResult = req.body.flexRadioDefault;
-    console.log(radioResult);
 
     function allDone(callback) {
         console.log("all done!");
@@ -132,19 +131,32 @@ app.get("/docs/:givenDoc", function(req, res) {
         
     }
 
+    function getMetadata (callback) {
+        var metadata = [];
+        var sql3 = "SELECT metadata.key, metadata.value FROM metadata JOIN document ON document.id = metadata.document_id WHERE document.id = '" + docID + "';";
+        db.all(sql3, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                metadata.push(JSON.stringify(row));
+            
+            });
+            callback(metadata);   
+        });
+    }
+
     function runQueriesInOrder(callback) {
         getDocInfo(function(docInfo) {
             getAllTerms(function(terms) {
-                res.render("doc-display", {
-                    docTitle: 'title',
-                    uniqueID: docID,
-                    pubDate: 'pubDate',
-                    authors: ['steve', 'bob', 'joe'],
-                    metadata: [1, 2, 3, 4, 5],
-                    arr: terms,
-                    partial2: 'temp-partial2'
-                });
-                allDone(callback);
+                getMetadata(function(metadata) {
+                    
+                    res.render("doc-display", {
+                        docInfo: docInfo[0].split('","'),
+                        metadata: metadata,
+                        arr: terms,
+                        partial2: 'temp-partial2'
+                    });
+                    allDone(callback);
+                })
             })
         })
     }
@@ -213,7 +225,7 @@ app.get("/terms/:givenTerm", function(req, res) {
 
     function getNLPPhrases (callback) {
         var nlpPhrases = [];
-        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
+        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "' OR nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
         db.all(sql3, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
@@ -299,7 +311,7 @@ app.post("/", function(req, res) {
 
     var radioResult = req.body.flexRadioDefault;
     if (radioResult == 'Terms') {
-        usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation LIKE '%" + req.body.word + "%';");
+        usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation = '" + req.body.word + "';");
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
         usingItNow(myCallback, "SELECT document.title AS 'title', document.id AS 'id', term.representation AS 'term', COUNT(term.representation) AS 'num_occurrences_total' FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE sentence.content LIKE '%" + req.body.word + "%' AND term.representation = '" + req.body.word + "' GROUP BY document.title;");
