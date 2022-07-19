@@ -314,7 +314,7 @@ app.post("/", function(req, res) {
         usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation = '" + req.body.word + "';");
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
-        usingItNow(myCallback, "SELECT document.title AS 'title', document.id AS 'id', term.representation AS 'term', COUNT(term.representation) AS 'num_occurrences_total' FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE sentence.content LIKE '%" + req.body.word + "%' AND term.representation = '" + req.body.word + "' GROUP BY document.title;");
+        usingItNow(myCallback, "SELECT document.title, MAX(CASE WHEN metadata.key = 'authors' THEN metadata.value END) AS 'author', MAX(CASE WHEN metadata.key = 'pubDate' THEN metadata.value END) AS 'pubDate', document.id, term.representation FROM metadata JOIN document ON document.id = metadata.document_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' AND (metadata.key = 'authors' OR metadata.key = 'pubDate') GROUP BY document.id;");
         res.redirect("/doc-table")
     }
     
