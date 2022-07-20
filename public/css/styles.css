@@ -1,5 +1,5 @@
 html {
-    margin: 5rem;
+    margin: 2rem 5rem 5rem 5rem;
 }
 
 td, th {
@@ -7,6 +7,10 @@ td, th {
     max-width: 150px;
 }
 .invisible {
+    visibility: hidden;
+    height: 0;
+}
+.invisible2 {
     visibility: hidden;
     height: 0;
 }

@@ -1,4 +1,5 @@
 <%- include('partials/header') -%>
+</head>
 <body>
     <h1>Parmenides</h1>
     <div class="doc-data">
@@ -24,8 +25,26 @@
             <p><span class="label">Author:</span> <%= authors %></p>
         <% } %>
         
+        <% var otherWorksArr = [] %>
+        <% for (var i = 0; i < otherWorks.length; i++) { %>
+            <% var row = otherWorks[i].split('","') %>
+            <% if (row[0].substring(10) != docInfo[0].substring(10,docInfo[0].length) && row[2].substring(8,row[2].length-2) == authors) { %>
+                <% otherWorksArr.push(row) %>
+            <% } %>
+        <% } %>
+        <% if (otherWorksArr.length > 0) { %>
+            <p><span class="label">Other works by <%= authors %>:</span></p>
+            <ul>
+                <% for (var i = 0; i < otherWorksArr.length; i++) { %>
+                    <% var url = "/docs/" + otherWorksArr[i][1].substring(5) %>
+                    <li><a href=<%= url %>><%= otherWorksArr[i][0].substring(10) %></a></li>
+                <% } %>
+            </ul> 
+        <% } %>
+        
+        
         <p><span class="label">Metadata Attributes:</span></p>
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-sm">
             <thead class="table-light">
                 <th>Category</th>
                 <th>Value</th>
@@ -35,7 +54,14 @@
                     <% var key = metadata[i].split('","')[0].substring(8) %>
                     <% var value = metadata[i].split('","')[1].substring(8, metadata[i].split('","')[1].length-2) %>
                     <% if (key != 'authors' && key != 'pubDate') { %>
-                        <td><%= key %></td>
+                        <% if (key === 'journal') { %>
+                            <td>Journal</td>
+                        <% } else if (key === 'volume') { %>
+                            <td>Volume</td>
+                        <% } else { %>
+                            <td>Year</td>
+                        <% } %>
+                        
                         <td><%= value %></td>
                     <% } %>
                 </tr>
@@ -54,10 +80,7 @@
         </form>
     </div>
     <br>
-    
-    <%- include('partials/all-terms') -%>
-    <%- include('partials/search-for-term') -%>
-    
+
     <script>
         function checkButton() {
             if(document.getElementById('allTerms').checked) {
@@ -70,6 +93,9 @@
             }
         }
     </script>
+    
+    <%- include('partials/all-terms') -%>
+    <%- include('partials/search-for-term') -%>
 
 </body>
 </html>

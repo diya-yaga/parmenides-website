@@ -1,23 +1,35 @@
 <%- include('partials/header') -%>
-
+<link rel="stylesheet" href="/css/tables.css">
+<script src="https://kit.fontawesome.com/a80cd916ad.js" crossorigin="anonymous"></script>
+</head>
 <body>
     <%- include('partials/search-bar-js') -%>
     <h1>Parmenides Search Tool</h1>
     <form action="/" method="post">
-        <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
-        <button type="submit" onclick="checkButton(); showTables();"> Submit </button><br><br>
-        <p>I want to find...</p>
-        <input type="radio" value="Terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2"> Terms<br>
-        <input type="radio" value="Documents" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1" checked> Documents<br>
+        <div class="container">
+            <div class="search-bar-div">
+                <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
+                <button type="submit" id="search-button" onclick="checkButton(); showTables();">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+        <div class="container2">
+            <h3 id="label-text">I want to find...</h3>
+            <div class="radio-buttons">
+                <span class="radio-button"><input type="radio" id="terms" value="Terms" class="form-check-input radio-button" name="flexRadioDefault" id="flexRadioDefault2"> Terms</span>
+                <span class="radio-button"><input type="radio" id="documents" value="Documents" class="form-check-input radio-button" name="flexRadioDefault" id="flexRadioDefault1" checked> Documents</span>
+                <br>    
+            </div>
+        </div>
     </form>
     <br>
-
     <div id="doc-table">
         <table class="table table-bordered table-hover">
             <thead class="table-light">
                 <th>Document Title</th>
                 <th>Authors</th>
-                <th>Publication Dates</th>
+                <th>Publication Date</th>
                 <th>Term in Document</th>
             </thead>
             <% for (var i = 0; i < data.length; i++) { %>
@@ -31,7 +43,7 @@
                         <% } else if (j == 2) { %>
                             <td><%= row[j].substring(10) %></td> 
                         <% } else if (j == 3) { %>
-                            <% var term = row[4].substring(17, row[4].length-2) %>
+                            <% var term = row[4].substring(17) %>
                             <% var url = "/termindoc/" + term + "/" + row[j].substring(5) %>
                             <td><a href=<%= url %>>Doc Page</a></td> 
                         <% } %>

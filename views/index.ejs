@@ -1,13 +1,26 @@
 <%- include('partials/header') -%>
-
+<link rel="stylesheet" href="/css/index.css">
+<script src="https://kit.fontawesome.com/a80cd916ad.js" crossorigin="anonymous"></script>
+</head>
 <body>
     <h1>Parmenides Search Tool</h1>
     <form action="/" method="post">
-        <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
-        <button type="submit" onclick="checkButton(); showTables();"> Submit </button><br><br>
-        <p>I want to find...</p>
-        <input type="radio" id="terms" value="Terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> Terms<br>
-        <input type="radio" id="documents" value="Documents" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Documents<br>
+        <div class="container">
+            <div class="search-bar-div">
+                <input type="text" id="search-bar" placeholder="Enter Search Term" autofocus required name="word">
+                <button type="submit" id="search-button" onclick="checkButton(); showTables();">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+        <div class="container2">
+            <h3 id="label-text">I want to find...</h3>
+            <div class="radio-buttons">
+                <span class="radio-button"><input type="radio" id="terms" value="Terms" class="form-check-input radio-button" name="flexRadioDefault" id="flexRadioDefault2" checked> Terms</span>
+                <span class="radio-button"><input type="radio" id="documents" value="Documents" class="form-check-input radio-button" name="flexRadioDefault" id="flexRadioDefault1"> Documents</span>
+                <br>    
+            </div>
+        </div>
     </form>
 
     <script>

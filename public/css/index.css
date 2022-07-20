@@ -1,0 +1,64 @@
+body {
+    padding: 5% 0;
+}
+
+h1 {
+    text-align:center;
+    font-size: 5rem;
+}
+
+.container {
+    width: 100%;
+    padding: 2% 5% 5% 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-bar-div {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    align-items: center;
+    background-color: lightgray;
+    border-radius: 60px;
+    padding: 10px 20px;
+}
+
+.search-bar-div input {
+    background: transparent;
+    flex: 1;
+    border: 0;
+    outline: none;
+    padding: 10px 10px;
+    font-size: 20px;
+    
+}
+
+.search-bar-div button {
+    background: transparent;
+    border: 0;
+    font-size: 25px;
+    padding-right: 10px;
+}
+
+.container2 {
+    width: 100%;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#label-text {
+    padding-bottom: 1%;
+}
+
+.radio-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.radio-button {
+    padding: 0 5%;
+    font-size: 2rem;
+}

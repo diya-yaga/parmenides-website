@@ -1,12 +1,14 @@
 <%- include('partials/header') -%>
+</head>
 <body>
     <h1>Parmenides</h1>
-    <% termURL = "/terms/" + termID.substring(7,termID.length-2) %>
+    
+    <% termURL = "/terms/" + termID.substring(7, termID.length-2) %>
+
     <h3>Term: 
         <a href=<%= termURL %>>
-            <span id="term">
-                <%= term %>
-            </span>
+            <span id="term"><%= term %></span>
+            
         </a>
     </h3>
     <h3>Document title: 

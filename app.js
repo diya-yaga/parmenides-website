@@ -143,19 +143,50 @@ app.get("/docs/:givenDoc", function(req, res) {
             callback(metadata);   
         });
     }
+    
+    function getDocContent (callback) {
+        var sentences = [];
+        var sql4 = "SELECT sentence.content FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE document.id = '" + docID + "' GROUP BY sentence.content;";
+        db.all(sql4, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                sentences.push(JSON.stringify(row));
+            
+            });  
+            callback(sentences);    
+        });
+    }
+
+    function getOtherWorks (callback) {
+        var documents = [];
+        var sql5 = "SELECT document.title, document.id, metadata.value FROM metadata JOIN document ON document.id = metadata.document_id WHERE metadata.key = 'authors';";
+        db.all(sql5, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                documents.push(JSON.stringify(row));
+            
+            });  
+            callback(documents);    
+        });
+    }
 
     function runQueriesInOrder(callback) {
         getDocInfo(function(docInfo) {
             getAllTerms(function(terms) {
                 getMetadata(function(metadata) {
-                    
-                    res.render("doc-display", {
-                        docInfo: docInfo[0].split('","'),
-                        metadata: metadata,
-                        arr: terms,
-                        partial2: 'temp-partial2'
-                    });
-                    allDone(callback);
+                    getDocContent(function(content) {
+                        getOtherWorks(function(works) {
+                            res.render("doc-display", {
+                                docInfo: docInfo[0].split('","'),
+                                metadata: metadata,
+                                arr: terms,
+                                partial2: 'temp-partial2',
+                                content: content,
+                                otherWorks: works
+                            });
+                            allDone(callback);
+                        })
+                    })
                 })
             })
         })
@@ -273,8 +304,7 @@ app.get("/terms/:givenTerm", function(req, res) {
                         data: pieces[0],
                         nlpPhrase: nlpPhraseData,
                         hyponyms: hyponymArr,
-                        similarTerms: simTermsArr
-                
+                        similarTerms: simTermsArr,                
                     });
                     allDone(callback);
                     })
@@ -314,7 +344,7 @@ app.post("/", function(req, res) {
         usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id WHERE term.representation = '" + req.body.word + "';");
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
-        usingItNow(myCallback, "SELECT document.title, MAX(CASE WHEN metadata.key = 'authors' THEN metadata.value END) AS 'author', MAX(CASE WHEN metadata.key = 'pubDate' THEN metadata.value END) AS 'pubDate', document.id, term.representation FROM metadata JOIN document ON document.id = metadata.document_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' AND (metadata.key = 'authors' OR metadata.key = 'pubDate') GROUP BY document.id;");
+        usingItNow(myCallback, "SELECT document.title, MAX(CASE WHEN metadata.key = 'authors' THEN metadata.value END) AS 'author', MAX(CASE WHEN metadata.key = 'pubDate' THEN metadata.value END) AS 'pubDate', document.id, term.representation, COUNT(term.representation) AS 'num_occurrences_total' FROM metadata JOIN document ON document.id = metadata.document_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' AND (metadata.key = 'authors' OR metadata.key = 'pubDate') GROUP BY document.id  ORDER BY num_occurrences_total, document.title;");
         res.redirect("/doc-table")
     }
     

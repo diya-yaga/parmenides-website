@@ -3,12 +3,51 @@
         <input type="text" id="termSearchBar" placeholder="Enter search term">
         <button type="button" onclick="searchForTerm()">Submit</button>
     </form>
-    <h1 id="givenTermPrint"></h1>
+    <br>
+    <% var passage = "" %>
+    <% for (var i = 0; i < content.length; i++) { %>
+        <% passage += content[i].substring(12, content[i].length-2) + " " %>
+    <% } %>
+    <p id="givenTermPrint" class="invisible2" style="outline: solid 1px; padding: 1rem;">
+    </p>
+    
 </div>
 
 <script>
     function searchForTerm() {
+        var passage = '<%= passage %>';
+        document.getElementById('givenTermPrint').innerHTML = passage;
         let userInput = document.getElementById('termSearchBar').value;
-        document.getElementById('givenTermPrint').innerHTML = userInput;
+        document.getElementById('givenTermPrint').classList.remove("invisible2");
+
+        let str = document.getElementById("givenTermPrint").innerHTML;
+        var term = userInput;
+        var term2 = "";
+        var sRegExInput = new RegExp(term, "gi");
+        var res = str.replace(sRegExInput, function(match) {
+            term2 = matchCase(term, match)
+            return "<span class='highlight'>" + term2 + "</span>"
+        });
+
+        document.getElementById("givenTermPrint").innerHTML = res;
+
+        document.getElementById('term').innerHTML = term2;
+
+        function matchCase(text, pattern) {
+            var result = '';
+
+            for(var i = 0; i < text.length; i++) {
+                var c = text.charAt(i);
+                var p = pattern.charCodeAt(i);
+
+                if(p >= 65 && p < 65 + 26) {
+                    result += c.toUpperCase();
+                } else {
+                    result += c.toLowerCase();
+                }
+            }
+
+            return result;
+        }
     }
 </script>
