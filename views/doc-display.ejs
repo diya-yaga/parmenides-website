@@ -54,14 +54,8 @@
                     <% var key = metadata[i].split('","')[0].substring(8) %>
                     <% var value = metadata[i].split('","')[1].substring(8, metadata[i].split('","')[1].length-2) %>
                     <% if (key != 'authors' && key != 'pubDate') { %>
-                        <% if (key === 'journal') { %>
-                            <td>Journal</td>
-                        <% } else if (key === 'volume') { %>
-                            <td>Volume</td>
-                        <% } else { %>
-                            <td>Year</td>
-                        <% } %>
-                        
+                        <% var keyLabel = key.substring(0, 1).toUpperCase() + key.substring(1) %>
+                        <td><%= keyLabel %></td>                     
                         <td><%= value %></td>
                     <% } %>
                 </tr>
