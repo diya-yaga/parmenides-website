@@ -77,9 +77,12 @@
                         <td><%= keyLabel %></td>                     
                         <td><%= value %></td>
                     <% } else { %>
-                        <% var keyLabel = key.toUpperCase() %>
-                        <td><%= keyLabel %></td>                     
-                        <td><%= value %></td> 
+                        <% if (value != 'None') { %>
+                            <td><%= key.toUpperCase() %></td>                     
+                            <td>
+                                <a href=<%= value %> target="_blank" rel="noopener noreferrer"><%= value %></a>    
+                            </td> 
+                        <% } %>
                     <% } %>
                 </tr>
             <% } %>
