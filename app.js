@@ -23,6 +23,126 @@ app.get("/", function(req, res) {
     
 });
 
+app.get("/term-table", function(req, res) {
+    if (req.body.flexRadioDefault == 'Documents') {
+        res.redirect("/doc-table");
+    }
+    
+    res.render("term-table", {
+        data: tableArr
+    })
+});
+
+app.get("/doc-table", function(req, res) {
+    console.log(req.body.word);
+    if (req.body.flexRadioDefault == 'Terms') {
+        res.redirect("/term-table");
+    }
+    
+    res.render("doc-table", {
+        data: tableArr
+    })
+});
+
+app.get("/terms/:givenTerm", function(req, res) {
+    var termID = req.params.givenTerm;
+
+    function allDone(callback) {
+        console.log("all done!");
+        callback();
+    }
+    
+    function getTermInfo(callback) {
+        var arr = [];
+        var sql1 = "SELECT tempTerm.representation AS normalized_representation, tempTerm.pos, IFNULL(tempTerm.rel, '<none>') AS rel, IFNULL(tempHead.representation, '<none>') AS head, IFNULL(tempDep.representation, '<none>') AS dep, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, IFNULL(tempHead.representation, 'none') AS hypernym, tempDep.id AS dep_id, tempDep.representation AS dep_rep FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempTerm.id = '" + termID + "' ORDER BY normalized_representation;";
+        db.all(sql1, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                arr.push(JSON.stringify(row));
+            
+            });   
+            callback(arr);    
+        });
+    }
+    
+    function getHyponyms (callback) {
+        var hyponyms = [];
+        var sql2 = "SELECT tempHead.id AS head_id, tempTerm.id AS hyponym_id, tempTerm.representation AS hyponym_rep FROM term tempTerm LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempHead.id = '" + termID + "';"; 
+        db.all(sql2, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                hyponyms.push(JSON.stringify(row));
+            
+            });
+            callback(hyponyms);   
+        });
+        
+    }
+
+    function getNLPPhrases (callback) {
+        var nlpPhrases = [];
+        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "' OR nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
+        db.all(sql3, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                nlpPhrases.push(JSON.stringify(row));
+            });
+            console.log(nlpPhrases);
+            callback(nlpPhrases);
+        });
+    }
+
+    function getSimilarTerms (callback) {
+        var simTerms = [];
+        var sql4 = "SELECT term.id, term.representation FROM term WHERE term.representation = (SELECT term.representation FROM term WHERE term.id = '" + termID + "') AND term.id != '" + termID + "';";
+        db.all(sql4, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                simTerms.push(JSON.stringify(row));
+            });
+            console.log(simTerms);
+            callback(simTerms);
+        });
+    }
+    
+    function runQueriesInOrder(callback) {
+        getHyponyms(function(hypoData) {
+            getTermInfo(function(termData) {
+                getNLPPhrases(function(nlpPhraseData) {
+                    getSimilarTerms(function(simTermData) {
+                    var pieces = [];
+                    for (var i = 0; i < termData.length; i++) {
+                        pieces.push(termData[i].split('","'));
+                    }
+                    
+                    var hyponymArr = [];
+                    for (var i = 0; i < hypoData.length; i++) {
+                    hyponymArr.push(hypoData[i].split('","')) 
+                    }
+
+                    var simTermsArr = [];
+                    for (var i = 0; i < simTermData.length; i++) {
+                        simTermsArr.push(simTermData[i].split('","'))
+                    }
+                    
+                    res.render("term-display", {
+                        data: pieces[0],
+                        nlpPhrase: nlpPhraseData,
+                        hyponyms: hyponymArr,
+                        similarTerms: simTermsArr,                
+                    });
+                    allDone(callback);
+                    })
+                })
+            })
+        })
+    }
+    
+    runQueriesInOrder(function() {
+        console.log('finished!');
+    })
+})
+
 app.get("/termindoc/:term/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
     var term = req.params.term;
@@ -143,6 +263,32 @@ app.get("/docs/:givenDoc", function(req, res) {
             callback(metadata);   
         });
     }
+
+    function getAuthors (callback) {
+        var authors = [];
+        var sql6 = "SELECT author.id, author.name FROM author JOIN authored ON author.id = authored.author_id JOIN document ON authored.document_id = document.id WHERE document.id = '" + docID + "';";
+        db.all(sql6, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                authors.push(JSON.stringify(row));
+            
+            });
+            callback(authors);   
+        });
+    }
+
+    function getPubDate (callback) {
+        var pubDate = [];
+        var sql7 = "SELECT document.published FROM document WHERE document.id = '" + docID + "';";
+        db.all(sql7, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                pubDate.push(JSON.stringify(row));
+            
+            });
+            callback(pubDate);   
+        });
+    }
     
     function getDocContent (callback) {
         var sentences = [];
@@ -159,7 +305,7 @@ app.get("/docs/:givenDoc", function(req, res) {
 
     function getOtherWorks (callback) {
         var documents = [];
-        var sql5 = "SELECT document.title, document.id, metadata.value FROM metadata JOIN document ON document.id = metadata.document_id WHERE metadata.key = 'authors';";
+        var sql5 = "SELECT document.id, document.title, author.name, author.id AS 'auth_id' FROM author JOIN authored ON author.id = authored.author_id JOIN document ON authored.document_id = document.id ORDER BY author.name;";
         db.all(sql5, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
@@ -176,15 +322,21 @@ app.get("/docs/:givenDoc", function(req, res) {
                 getMetadata(function(metadata) {
                     getDocContent(function(content) {
                         getOtherWorks(function(works) {
-                            res.render("doc-display", {
-                                docInfo: docInfo[0].split('","'),
-                                metadata: metadata,
-                                arr: terms,
-                                partial2: 'temp-partial2',
-                                content: content,
-                                otherWorks: works
-                            });
-                            allDone(callback);
+                            getAuthors(function(authors) {
+                                getPubDate(function(pubDate) {
+                                    res.render("doc-display", {
+                                        docInfo: docInfo[0].split('","'),
+                                        metadata: metadata,
+                                        arr: terms,
+                                        partial2: 'temp-partial2',
+                                        content: content,
+                                        otherWorks: works,
+                                        authors: authors,
+                                        pubDate: pubDate
+                                    });
+                                    allDone(callback);
+                                })
+                            })
                         })
                     })
                 })
@@ -196,127 +348,6 @@ app.get("/docs/:givenDoc", function(req, res) {
         console.log('finished!');
     })
 });
-
-
-app.get("/term-table", function(req, res) {
-    if (req.body.flexRadioDefault == 'Documents') {
-        res.redirect("/doc-table");
-    }
-    
-    res.render("term-table", {
-        data: tableArr
-    })
-});
-
-app.get("/doc-table", function(req, res) {
-    console.log(req.body.word);
-    if (req.body.flexRadioDefault == 'Terms') {
-        res.redirect("/term-table");
-    }
-    
-    res.render("doc-table", {
-        data: tableArr
-    })
-});
-
-app.get("/terms/:givenTerm", function(req, res) {
-    var termID = req.params.givenTerm;
-
-    function allDone(callback) {
-        console.log("all done!");
-        callback();
-    }
-    
-    function getTermInfo(callback) {
-        var arr = [];
-        var sql1 = "SELECT tempTerm.representation AS normalized_representation, tempTerm.pos, IFNULL(tempTerm.rel, '<none>') AS rel, IFNULL(tempHead.representation, '<none>') AS head, IFNULL(tempDep.representation, '<none>') AS dep, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, IFNULL(tempHead.representation, 'none') AS hypernym, tempDep.id AS dep_id, tempDep.representation AS dep_rep FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempTerm.id = '" + termID + "' ORDER BY normalized_representation;";
-        db.all(sql1, [], (err, rows) => {
-            if (err) return callback(err.message);
-            rows.forEach((row) => {
-                arr.push(JSON.stringify(row));
-            
-            });   
-            callback(arr);    
-        });
-    }
-    
-    function getHyponyms (callback) {
-        var hyponyms = [];
-        var sql2 = "SELECT tempHead.id AS head_id, tempTerm.id AS hyponym_id, tempTerm.representation AS hyponym_rep FROM term tempTerm LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE tempHead.id = '" + termID + "';"; 
-        db.all(sql2, [], (err, rows) => {
-            if (err) return callback(err.message);
-            rows.forEach((row) => {
-                hyponyms.push(JSON.stringify(row));
-            
-            });
-            callback(hyponyms);   
-        });
-        
-    }
-
-    function getNLPPhrases (callback) {
-        var nlpPhrases = [];
-        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "' OR nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
-        db.all(sql3, [], (err, rows) => {
-            if (err) return callback(err.message);
-            rows.forEach((row) => {
-                nlpPhrases.push(JSON.stringify(row));
-            });
-            console.log(nlpPhrases);
-            callback(nlpPhrases);
-        });
-    }
-
-    function getSimilarTerms (callback) {
-        var simTerms = [];
-        var sql4 = "SELECT term.id, term.representation FROM term WHERE term.representation = (SELECT term.representation FROM term WHERE term.id = '" + termID + "') AND term.id != '" + termID + "';";
-        db.all(sql4, [], (err, rows) => {
-            if (err) return callback(err.message);
-            rows.forEach((row) => {
-                simTerms.push(JSON.stringify(row));
-            });
-            console.log(simTerms);
-            callback(simTerms);
-        });
-    }
-    
-    function runQueriesInOrder(callback) {
-        getHyponyms(function(hypoData) {
-            getTermInfo(function(termData) {
-                getNLPPhrases(function(nlpPhraseData) {
-                    getSimilarTerms(function(simTermData) {
-                    var pieces = [];
-                    for (var i = 0; i < termData.length; i++) {
-                        pieces.push(termData[i].split('","'));
-                    }
-                    
-                    var hyponymArr = [];
-                    for (var i = 0; i < hypoData.length; i++) {
-                    hyponymArr.push(hypoData[i].split('","')) 
-                    }
-
-                    var simTermsArr = [];
-                    for (var i = 0; i < simTermData.length; i++) {
-                        simTermsArr.push(simTermData[i].split('","'))
-                    }
-                    
-                    res.render("term-display", {
-                        data: pieces[0],
-                        nlpPhrase: nlpPhraseData,
-                        hyponyms: hyponymArr,
-                        similarTerms: simTermsArr,                
-                    });
-                    allDone(callback);
-                    })
-                })
-            })
-        })
-    }
-    
-    runQueriesInOrder(function() {
-        console.log('finished!');
-    })
-})
 
 
 app.post("/", function(req, res) {

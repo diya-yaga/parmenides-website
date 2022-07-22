@@ -3,46 +3,63 @@
 <body>
     <h1>Parmenides</h1>
     <div class="doc-data">
-        <p><span class="label">Document Title:</span> <%= docInfo[0].substring(10,docInfo[0].length) %></p>
-        <p><span class="label">Unique ID:</span> <%= docInfo[1].substring(5,docInfo[1].length-2) %></p>
+        <% var title = docInfo[0].substring(10,docInfo[0].length) %>
+        <% var uniqueID = docInfo[1].substring(5,docInfo[1].length-2) %>
+        <p><span class="label">Document Title:</span> <%= title %></p>
+        <p><span class="label">Unique ID:</span> <%= uniqueID %></p>
 
-        <% var pubDate = '' %>
-        <% var authors = '' %>
-        <% for (var i = 0; i < metadata.length; i++) { %>
-            <% var row = metadata[i].split('","') %>
-            <% if (row[0].split('":"')[1] == 'pubDate') { %>
-                <% pubDate = row[1].split('":"')[1].substring(0, row[1].split('":"')[1].length-2)%>
-            <% } else if (row[0].split('":"')[1] == 'authors') { %>
-                <% authors = row[1].split('":"')[1].substring(0, row[1].split('":"')[1].length-2)%>
-            <% } %>
-        <% } %>
+        <p><span class="label">Publication Date:</span> <%= pubDate[0].substring(14, pubDate[0].length-2) %></p>
 
-        <p><span class="label">Publication Date:</span> <%= pubDate %></p>
-
-        <% if (authors.split(' and ').length > 1) { %>
-            <p><span class="label">Authors:</span> <%= authors %></p>
-        <% } else { %>
-            <p><span class="label">Author:</span> <%= authors %></p>
-        <% } %>
-        
-        <% var otherWorksArr = [] %>
-        <% for (var i = 0; i < otherWorks.length; i++) { %>
-            <% var row = otherWorks[i].split('","') %>
-            <% if (row[0].substring(10) != docInfo[0].substring(10,docInfo[0].length) && row[2].substring(8,row[2].length-2) == authors) { %>
-                <% otherWorksArr.push(row) %>
-            <% } %>
-        <% } %>
-        <% if (otherWorksArr.length > 0) { %>
-            <p><span class="label">Other works by <%= authors %>:</span></p>
-            <ul>
-                <% for (var i = 0; i < otherWorksArr.length; i++) { %>
-                    <% var url = "/docs/" + otherWorksArr[i][1].substring(5) %>
-                    <li><a href=<%= url %>><%= otherWorksArr[i][0].substring(10) %></a></li>
+        <p>
+        <% if (authors.length > 1) { %>
+            <p><span class="label">Authors:</span> 
+                <% for (var i = 0; i < authors.length-1; i++) { %>
+                    <%= authors[i].split('","')[1].substring(7,authors[i].split('","')[1].length-2) + ', ' %>
                 <% } %>
-            </ul> 
+                <%= authors[authors.length-1].split('","')[1].substring(7,authors[authors.length-1].split('","')[1].length-2) %>
+            </p>
+        <% } else { %>
+            <p><span class="label">Author:</span> <%= authors[0].split('","')[1].substring(7,authors[0].split('","')[1].length-2) %></p>
         <% } %>
-        
-        
+
+        <% var otherWorksArr2 = [] %>
+        <ul>
+            <% for (var i = 0; i < otherWorks.length; i++) { %>
+                <% otherWorksArr2[i] = [] %>
+                <% for (var thisAuth = 0; thisAuth < authors.length; thisAuth++) { %>
+                    <% var row = otherWorks[i].split('","') %>
+                    <% if (row[0].substring(7) != uniqueID && row[3].substring(10,row[3].length-2) == authors[thisAuth].split('","')[0].substring(7)) { %>
+                        <% otherWorksArr2[thisAuth].push(row) %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul>
+
+        <% for (var i = 0; i < otherWorksArr2.length; i++) { %>
+            <% if (otherWorksArr2[i].length > 0) { %>
+                <p><span class="label">Other works:</span></p>
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <% if (authors.length > 1) { %>
+                            <th><%= otherWorksArr2[i][0][2].substring(7) %></th>
+                        <% } %>
+                        
+                    </thead>
+                    
+                        <% for (var j = 0; j < otherWorksArr2[i].length; j++) { %>
+                            <tr>
+                                <% var url = "/docs/" + otherWorksArr2[i][j][0].substring(7) %>
+                                <td>
+                                    <a href=<%= url %>><%= otherWorksArr2[i][j][1].substring(8) %></a>
+                                    
+                                </td>
+                            </tr>
+                            
+                        <% } %>
+                </table>
+            <% } %>
+        <% } %>
+
         <p><span class="label">Metadata Attributes:</span></p>
         <table class="table table-bordered table-sm">
             <thead class="table-light">
@@ -53,10 +70,14 @@
                 <tr>
                     <% var key = metadata[i].split('","')[0].substring(8) %>
                     <% var value = metadata[i].split('","')[1].substring(8, metadata[i].split('","')[1].length-2) %>
-                    <% if (key != 'authors' && key != 'pubDate') { %>
+                    <% if (key != 'pdf') { %>
                         <% var keyLabel = key.substring(0, 1).toUpperCase() + key.substring(1) %>
                         <td><%= keyLabel %></td>                     
                         <td><%= value %></td>
+                    <% } else { %>
+                        <% var keyLabel = key.toUpperCase() %>
+                        <td><%= keyLabel %></td>                     
+                        <td><%= value %></td> 
                     <% } %>
                 </tr>
             <% } %>
