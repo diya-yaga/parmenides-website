@@ -35,7 +35,14 @@
                 <% } %>
             <% } %>
         </ul>
-        <% if (otherWorksArr[0].length > 0) { %>
+
+        <% var areOtherWorks = false %>
+        <% for (var i = 0; i < authors.length; i++) { %>
+            <% if (otherWorksArr[i].length > 0) { %>
+                <% areOtherWorks = true %>
+            <% } %>
+        <% } %>
+        <% if (areOtherWorks) { %>
             <p><span class="label">Other works:</span></p>
             <div class="row">  
                 <% for (var i = 0; i < otherWorksArr.length; i++) { %>
@@ -62,8 +69,9 @@
             </div>
         <% } %>
 
-        <p><span class="label">Metadata Attributes:</span></p>
-        <table class="table table-bordered table-sm">
+        <% if (metadata.length != 0) { %>
+            <p><span class="label">Other Information:</span></p>
+            <table class="table table-bordered table-sm">
             <thead class="table-light">
                 <th>Category</th>
                 <th>Value</th>
@@ -86,7 +94,8 @@
                     <% } %>
                 </tr>
             <% } %>
-        </table>
+            </table>
+        <% } %>
         
     </div>
 

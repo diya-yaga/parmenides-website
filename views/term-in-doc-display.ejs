@@ -2,7 +2,6 @@
 </head>
 <body>
     <h1>Parmenides</h1>
-    
     <% termURL = "/terms/" + termID.substring(7, termID.length-2) %>
 
     <h3>Term: 
@@ -11,10 +10,9 @@
             
         </a>
     </h3>
-    <h3>Document title: 
-        <%= docTitle[0].split('","')[0].substring(10) %>
+    <h3>Document: 
+        <a href= <%= docUrl %> ><%= docTitle[0].split('","')[0].substring(10) %></a>
     </h3>
-    <h3><a href= <%= docUrl %> >Link to document</a></h3>
     <br>
     <div style="outline: 1px; outline-style: solid; padding: 1rem;" >
         <p id="documentContent">

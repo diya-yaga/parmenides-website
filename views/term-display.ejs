@@ -4,11 +4,38 @@
     <h1>Parmenides</h1>
     <br>
     <div class="term-data-1">
+        <% var info = "" %>
+        <% var url = "" %>
         <p><span class="label">Normalized representation:</span> <%= data[0].substring(30, data[0].length) %></p>
         <p><span class="label">Part of Speech tag: </span><%= data[1].substring(6, data[1].length) %></p>
-        <p><span class="label">REL: </span><%= data[2].substring(6, data[2].length) %></p>
-        <p><span class="label">HEAD: </span><%= data[3].substring(7, data[3].length) %></p>
-        <p><span class="label">DEP: </span><%= data[4].substring(6, data[4].length) %></p>
+        <p><span class="label">REL: </span>
+            <% if (data[2].substring(6, data[2].length).length == 0) { %>
+                <% info = 'none' %>
+            <% } else { %>
+                <% info = data[2].substring(6, data[2].length) %>
+            <% } %>
+            <%= info %>
+        </p>
+        <p><span class="label">HEAD: </span>
+            <% if (data[3].substring(7, data[3].length).length == 0) { %>
+                <%= 'none' %>
+            <% } else { %>
+                <% url = '/terms/' + data[7].substring(10) %>
+                <% info = data[3].substring(7, data[3].length) %>
+
+                <a href= <%= url %> ><%= info %></a>
+            <% } %>
+        </p>
+        <p><span class="label">DEP: </span>
+            <% if (data[4].substring(6, data[4].length).length == 0) { %>
+                <%= 'none' %>
+            <% } else { %>
+                <% url = '/terms/' + data[8].substring(9, data[8].length-2) %>
+                <% info = data[4].substring(6, data[4].length) %>
+
+                <a href= <%= url %> ><%= info %></a>
+            <% } %>
+        </p>
         <br>
         <p>
             <span class="label">NLP phrases:</span> 
@@ -22,8 +49,8 @@
     </div>
     <br>
     <div class="term-data-2">
-        <% var hypernymID = data[6].substring(11, data[6].length) %>
-        <% if (hypernymID === 'none') { %>
+        <% var hypernymID = data[7].substring(10) %>
+        <% if (hypernymID.length == 0) { %>
             <p><span class="label">Hypernym: </span>none</p>
         <% } else { %>
             <% var url = "/terms/" + hypernymID %>
@@ -44,16 +71,18 @@
             </ul>
             
         </p>
-        <p><span class="label">Similar terms: </span>
-            <ul>
-                <% for (var i = 0; i < similarTerms.length; i++) { %>
-                    <li>
-                        <% var url = "/terms/" + similarTerms[i][0].substring(7) %>
-                        <a href= <%= url %> > <%= similarTerms[i][1].substring(17,similarTerms[i][1].length-2)%> </a>
-                    </li>
-                <% } %>
-            </ul>
-        </p>
+        <% if (similarTerms.length > 0) { %>
+            <p><span class="label">Similar terms: </span>
+                <ul>
+                    <% for (var i = 0; i < similarTerms.length; i++) { %>
+                        <li>
+                            <% var url = "/terms/" + similarTerms[i][0].substring(7) %>
+                            <a href= <%= url %> > <%= similarTerms[i][1].substring(17,similarTerms[i][1].length-2)%> </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </p>
+        <% } %>
     </div>
 </body>
 </html>
