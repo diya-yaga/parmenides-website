@@ -8,7 +8,7 @@ td, th {
 }
 
 .invisible {
-    visibility: hidden;
+    display: none;
     height: 0;
 }
 .invisible2 {

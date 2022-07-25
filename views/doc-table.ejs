@@ -43,8 +43,8 @@
                         <% } else if (j == 2) { %>
                             <td><%= row[j].substring(10) %></td> 
                         <% } else if (j == 3) { %>
-                            <% var term = row[4].substring(17) %>
-                            <% var url = "/termindoc/" + term + "/" + row[j].substring(5) %>
+                            <% var termID = row[4].substring(10) %>
+                            <% var url = "/termindoc/" + termID + "/" + row[j].substring(5) %>
                             <td><a href=<%= url %>>Doc Page</a></td> 
                         <% } %>
                     <% } %>

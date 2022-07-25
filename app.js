@@ -145,7 +145,7 @@ app.get("/terms/:givenTerm", function(req, res) {
 
 app.get("/termindoc/:term/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
-    var term = req.params.term;
+    var termID = req.params.term;
     
     function allDone(callback) {
         console.log("all done!");
@@ -188,16 +188,16 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
         
     }
 
-    function getTermID(callback) {
-        var ids = [];
-        var sql3 = "SELECT term.id FROM term WHERE term.representation='" + term + "';";
+    function getTermRep(callback) {
+        var terms = [];
+        var sql3 = "SELECT term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON phrase.term_id = term.id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "';";
         db.all(sql3, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
-                ids.push(JSON.stringify(row));
+                terms.push(JSON.stringify(row));
             
             });
-            callback(ids);   
+            callback(terms);   
         });
     }
 
@@ -205,10 +205,10 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
         alterTable(function(temp) {
             getDocInfo(function(docInfo) {
                 getDocContent(function(docContent) {
-                    getTermID(function(termID) {
+                    getTermRep(function(terms) {
                         res.render('term-in-doc-display', {
-                            term: term,
-                            termID: termID[0],
+                            termID: termID,
+                            term: terms,
                             docTitle: docInfo,
                             docUrl: '/docs/' + docID,
                             content: docContent
@@ -398,7 +398,7 @@ app.post("/", function(req, res) {
         usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id WHERE term.representation = '" + req.body.word + "' OR nlp_phrase LIKE '%" + req.body.word + "%' GROUP BY document.id ORDER BY term.representation DESC;");
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
-        usingItNow(myCallback, "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.representation, COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' OR SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) LIKE '%" + req.body.word + "%' GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;");
+        usingItNow(myCallback, "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' OR nlp_phrase LIKE '%" + req.body.word + "%' GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;");
         res.redirect("/doc-table")
     }
     
