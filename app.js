@@ -81,7 +81,7 @@ app.get("/terms/:givenTerm", function(req, res) {
 
     function getNLPPhrases (callback) {
         var nlpPhrases = [];
-        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "' OR nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;";
+        var sql3 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "' GROUP BY nlp_phrase;";
         db.all(sql3, [], (err, rows) => {
             if (err) return callback(err.message);
             rows.forEach((row) => {
@@ -415,5 +415,4 @@ app.post("/doc-table", function(req, res) {
 app.listen(3000, function() {
     console.log("Server started on port 3000");
 });
-
 

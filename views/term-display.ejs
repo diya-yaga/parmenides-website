@@ -39,11 +39,15 @@
         <br>
         <p>
             <span class="label">NLP phrases:</span> 
-            <ul>
-                <% for (var i = 0; i < nlpPhrase.length; i++) { %>
-                    <li><%= nlpPhrase[i].substring(16, nlpPhrase[i].length-2) %></li>
-                <% } %>
-            </ul>
+            <% if (nlpPhrase.length > 1) { %>
+                <ul>
+                    <% for (var i = 0; i < nlpPhrase.length; i++) { %>
+                        <li><%= nlpPhrase[i].substring(16, nlpPhrase[i].length-2) %></li>
+                    <% } %>
+                </ul>
+            <% } else { %>
+                <%= nlpPhrase[0].substring(16, nlpPhrase[0].length-2) %>
+            <% } %>
             
         </p>
     </div>
