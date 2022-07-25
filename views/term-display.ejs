@@ -8,15 +8,7 @@
         <% var url = "" %>
         <p><span class="label">Normalized representation:</span> <%= data[0].substring(30, data[0].length) %></p>
         <p><span class="label">Part of Speech tag: </span><%= data[1].substring(6, data[1].length) %></p>
-        <p><span class="label">REL: </span>
-            <% if (data[2].substring(6, data[2].length).length == 0) { %>
-                <% info = 'none' %>
-            <% } else { %>
-                <% info = data[2].substring(6, data[2].length) %>
-            <% } %>
-            <%= info %>
-        </p>
-        <p><span class="label">HEAD: </span>
+        <p><span class="label">Head: </span>
             <% if (data[3].substring(7, data[3].length).length == 0) { %>
                 <%= 'none' %>
             <% } else { %>
@@ -26,7 +18,7 @@
                 <a href= <%= url %> ><%= info %></a>
             <% } %>
         </p>
-        <p><span class="label">DEP: </span>
+        <p><span class="label">Dependent: </span>
             <% if (data[4].substring(6, data[4].length).length == 0) { %>
                 <%= 'none' %>
             <% } else { %>
@@ -36,16 +28,25 @@
                 <a href= <%= url %> ><%= info %></a>
             <% } %>
         </p>
+        <p><span class="label">Relation: </span>
+            <% if (data[2].substring(6, data[2].length).length == 0) { %>
+                <% info = 'none' %>
+            <% } else { %>
+                <% info = data[2].substring(6, data[2].length) %>
+            <% } %>
+            <%= info %>
+        </p>
         <br>
         <p>
-            <span class="label">NLP phrases:</span> 
             <% if (nlpPhrase.length > 1) { %>
+                <span class="label">NLP phrases:</span> 
                 <ul>
                     <% for (var i = 0; i < nlpPhrase.length; i++) { %>
                         <li><%= nlpPhrase[i].substring(16, nlpPhrase[i].length-2) %></li>
                     <% } %>
                 </ul>
             <% } else { %>
+                <span class="label">NLP phrase:</span> 
                 <%= nlpPhrase[0].substring(16, nlpPhrase[0].length-2) %>
             <% } %>
             
