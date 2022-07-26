@@ -141,7 +141,7 @@ app.get("/terms/:givenTerm", function(req, res) {
     runQueriesInOrder(function() {
         console.log('finished!');
     })
-})
+});
 
 app.get("/termindoc/:term/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
@@ -224,7 +224,7 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
     runQueriesInOrder(function() {
         console.log('finished!');
     })
-})
+});
 
 
 app.get("/docs/:givenDoc", function(req, res) {

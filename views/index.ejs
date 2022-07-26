@@ -20,6 +20,16 @@
                 <span class="radio-button"><input type="radio" id="documents" value="Documents" class="form-check-input radio-button" name="flexRadioDefault" id="flexRadioDefault1"> Documents</span>
                 <br>    
             </div>
+            <br>
+            <div class="advanced-search">
+                <button type="button" onclick="checkAdvancedSearchButton();" class="btn btn-primary btn-lg">Advanced Search</button>
+            </div>
+        </div>
+        <div id="search-advanced-terms" class="invisible">
+            <%- include('partials/search-advanced-terms') -%>
+        </div>
+        <div id="search-advanced-docs" class="invisible">
+            <%- include('partials/search-advanced-docs') -%>
         </div>
     </form>
 
@@ -51,12 +61,20 @@
     }
     
 </script>
-    <br><br>
-    <h1 id="temp-show-stuff">
 
-    </h1>
+<script>
+    function checkAdvancedSearchButton() {
+        if(document.getElementById('terms').checked) {
+            document.getElementById("search-advanced-docs").classList.add("invisible");
+            document.getElementById("search-advanced-terms").classList.remove("invisible");
+        } else {
+            document.getElementById("search-advanced-terms").classList.add("invisible");
+            document.getElementById("search-advanced-docs").classList.remove("invisible");
+        }
+    }
+
+</script>
 
 </body>
-
 
 </html>

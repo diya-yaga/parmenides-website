@@ -1,0 +1,14 @@
+.advancedTerms {
+    outline: 1px solid;
+    padding: 1rem;
+    margin: 2rem;
+}
+
+.inputItem {
+    margin-bottom: 10px;
+}
+label {
+    display: inline-block;
+    width: 5rem;
+    text-align: right;
+}
