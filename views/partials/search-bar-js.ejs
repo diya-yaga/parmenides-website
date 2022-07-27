@@ -1,27 +1,24 @@
 <script>
-    function checkButton() {
-        let userInput = document.getElementById('search-bar').value;
-        if(document.getElementById('terms').checked) {
-            document.getElementById("doc-table").classList.add("invisible");
-            document.getElementById("term-table").classList.remove("invisible");
-    
-        } else {
-            document.getElementById("term-table").classList.add("invisible");
-            document.getElementById("doc-table").classList.remove("invisible");
-    
-        };
-    };
+    $(document).ready(function() {
+        $('.search-button').on('click', function() {
+            let userInput = $('#search-bar').val();
 
-    function showTables() {
-        let userInput = document.getElementById('search-bar').value;
-        var tableRowTerms = document.getElementsByClassName('term-tr');
-        var tableDataTerms = document.getElementsByClassName('term-td');
+            if ($('#terms').is(':checked')) {
+                $("#doc-table").addClass("invisible");
+                $("#term-table").removeClass("invisible");
+        
+            } else {
+                $("#term-table").addClass("invisible");
+                $("#doc-table").removeClass("invisible");
+        
+            };
 
-        for (var i = 0; i < tableRowTerms.length; i++) {
-            if (tableDataTerms[i].innerHTML.trim() != userInput.trim()) {
-                tableRowTerms[i].classList.add("invisible-row");
-            }   
-        };
-    };
+            for (var i = 0; i < $('.term-tr').length; i++) {
+                if ($('.term-td').eq(i).html().trim() != userInput.trim()) {
+                    $('.term-tr').eq(i).addClass("invisible-row");
+                }   
+            };
+        });
+    });
     
 </script>

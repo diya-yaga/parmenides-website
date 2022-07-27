@@ -2,14 +2,14 @@
 </head>
 <body>
 
-    <span id="term" class="invisible"><%= term[0].split('","')[1].substring(14,term[0].split('","')[1].length-2) %></span>
-
+    <span id="term" class="invisible"><%= term[0].split('","')[1].substring(13,term[0].split('","')[1].length-2) %></span>
+    <h1 id="temph1"></h1>
     <h1>Parmenides</h1>
     <% termURL = "/terms/" + termID %>
     
     <h3>Term: 
         <a href=<%= termURL %>>
-            <%= term[0].split('","')[0].substring(19)%>            
+            <%= term[0].split('","')[1].substring(13,term[0].split('","')[1].length-2)%>          
         </a>
     </h3>
     <h3>Document: 
@@ -26,36 +26,15 @@
             <%= passage %>
         </p>
     </div>
+
     <script>
-        let str = document.getElementById("documentContent").innerHTML;
-        var term = document.getElementById('term').innerHTML.trim();
-        var term2 = "";
-        var sRegExInput = new RegExp(term, "gi");
-        var res = str.replace(sRegExInput, function(match) {
-            term2 = matchCase(term, match)
-            return "<span class='highlight'>" + term2 + "</span>"
+        $(document).ready(function() {
+            let content = $("#documentContent").text();
+            var term = $('#term').text().trim();
+            var termRegExp = new RegExp(term, 'g')
+            content = content.replace(termRegExp, '<span class="highlight">' + term + '</span>');
+            $("#documentContent").html(content);
         });
-
-        document.getElementById("documentContent").innerHTML = res;
-
-        document.getElementById('term').innerHTML = term2;
-
-        function matchCase(text, pattern) {
-            var result = '';
-
-            for(var i = 0; i < text.length; i++) {
-                var c = text.charAt(i);
-                var p = pattern.charCodeAt(i);
-
-                if(p >= 65 && p < 65 + 26) {
-                    result += c.toUpperCase();
-                } else {
-                    result += c.toLowerCase();
-                }
-            }
-
-            return result;
-        }
     </script>
 </body>
 </html>

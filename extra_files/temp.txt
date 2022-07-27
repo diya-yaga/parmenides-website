@@ -1,1 +1,27 @@
-SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM term JOIN phrase ON term.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id WHERE term.id = '" + termID + "' OR nlp_phrase LIKE (SELECT '%' || term.representation || '%' FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase;
+        var term2 = "";
+        var sRegExInput = new RegExp(term, "gi");
+        var res = content.replace(sRegExInput, function(match) {
+            term2 = matchCase(term, match)
+            return "<span class='highlight'>" + term2 + "</span>"
+        });
+
+        document.getElementById("documentContent").innerHTML = res;
+
+        document.getElementById('term').innerHTML = term2;
+
+        function matchCase(text, pattern) {
+            var result = '';
+
+            for(var i = 0; i < text.length; i++) {
+                var c = text.charAt(i);
+                var p = pattern.charCodeAt(i);
+
+                if(p >= 65 && p < 65 + 26) {
+                    result += c.toUpperCase();
+                } else {
+                    result += c.toLowerCase();
+                }
+            }
+
+            return result;
+        }

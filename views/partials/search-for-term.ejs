@@ -1,41 +1,39 @@
 <div id="searchForTermTable" class="invisible">
     <form>
         <input type="text" id="termSearchBar" placeholder="Enter search term">
-        <button type="button" onclick="searchForTerm()">Submit</button>
+        <button type="button" id="submitButton" >Submit</button>
     </form>
     <br>
     <% var passage = "" %>
     <% for (var i = 0; i < content.length; i++) { %>
         <% passage += content[i].substring(12, content[i].length-2) + " " %>
     <% } %>
-    <p id="givenTermPrint" class="invisible2" style="outline: solid 1px; padding: 1rem;">
+    <p id="givenTermPrint" class="invisible" style="outline: solid 1px; padding: 1rem;">
     </p>
     
 </div>
 
 <script>
-    function searchForTerm() {
-        var passage = '<%= passage %>';
-        document.getElementById('givenTermPrint').innerHTML = passage;
-        let userInput = document.getElementById('termSearchBar').value;
-        document.getElementById('givenTermPrint').classList.remove("invisible2");
+    $(document).ready(function() {
+        $('#submitButton').on('click', function() {
+            var passage = '<%= passage %>';
+            $('#givenTermPrint').text(passage);
+            let userInput = $('#termSearchBar').val();
+            $('#givenTermPrint').removeClass("invisible");
 
-        let str = document.getElementById("givenTermPrint").innerHTML;
-        var term = userInput;
-        var term2 = "";
-        var sRegExInput = new RegExp(term, "gi");
-        var res = str.replace(sRegExInput, function(match) {
-            term2 = matchCase(term, match)
-            return "<span class='highlight'>" + term2 + "</span>"
+            let str = $("#givenTermPrint").text();
+            var term = userInput;
+
+            var termRegExp = new RegExp(term, 'gi')
+            str = str.replace(termRegExp, function(match) {
+                return '<span class="highlight">' + matchCase(term, match) + '</span>'
+            });
+
+            $("#givenTermPrint").html(str);
         });
-
-        document.getElementById("givenTermPrint").innerHTML = res;
-
-        document.getElementById('term').innerHTML = term2;
 
         function matchCase(text, pattern) {
             var result = '';
-
             for(var i = 0; i < text.length; i++) {
                 var c = text.charAt(i);
                 var p = pattern.charCodeAt(i);
@@ -46,8 +44,7 @@
                     result += c.toLowerCase();
                 }
             }
-
             return result;
         }
-    }
+    });
 </script>

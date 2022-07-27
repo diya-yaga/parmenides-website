@@ -11,10 +11,6 @@ td, th {
     display: none;
     height: 0;
 }
-.invisible2 {
-    visibility: hidden;
-    height: 0;
-}
 
 .invisible-row {
     display: none;

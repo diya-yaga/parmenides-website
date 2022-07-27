@@ -105,24 +105,25 @@
         <form>
             <input type="radio" id="allTerms" value="list_all_terms" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault2" checked> List All Terms<br>
             <input type="radio" id="searchForTerm" value="search_for_a_term" class="form-check-input" name="flexRadioDefault" id="flexRadioDefault1"> Search For A Term<br><br>
-            <button type="button" onclick="checkButton()">Submit</button>
+            <button type="button">Submit</button>
         </form>
     </div>
     <br>
-
+    
     <script>
-        function checkButton() {
-            if(document.getElementById('allTerms').checked) {
-                document.getElementById("searchForTermTable").classList.add("invisible");
-                document.getElementById("allTermsTable").classList.remove("invisible");
-    
-            } else {
-                document.getElementById("allTermsTable").classList.add("invisible");
-                document.getElementById("searchForTermTable").classList.remove("invisible");
-            }
-        }
+        $(document).ready(function() {
+            $('.addtl-search button').on('click', function() {
+                if($('#allTerms').is(':checked')) {
+                    $("#searchForTermTable").addClass("invisible");
+                    $("#allTermsTable").removeClass("invisible");
+                } else if ($('#searchForTerm').is(':checked')) {
+                    $("#allTermsTable").addClass("invisible");
+                    $("#searchForTermTable").removeClass("invisible");
+                }
+            })
+        })
     </script>
-    
+
     <%- include('partials/all-terms') -%>
     <%- include('partials/search-for-term') -%>
 

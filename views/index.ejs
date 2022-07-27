@@ -22,7 +22,7 @@
             </div>
             <br>
             <div class="advanced-search">
-                <button type="button" onclick="checkAdvancedSearchButton();" class="btn btn-primary btn-lg">Advanced Search</button>
+                <button type="button" class="btn btn-primary btn-lg">Advanced Search</button>
             </div>
         </div>
         <div id="search-advanced-terms" class="invisible">
@@ -33,19 +33,20 @@
         </div>
     </form>
 
-<script>
-    function checkAdvancedSearchButton() {
-        if(document.getElementById('terms').checked) {
-            document.getElementById("search-advanced-docs").classList.add("invisible");
-            document.getElementById("search-advanced-terms").classList.remove("invisible");
-        } else {
-            document.getElementById("search-advanced-terms").classList.add("invisible");
-            document.getElementById("search-advanced-docs").classList.remove("invisible");
-        }
-    }
+    <script>
+        $(document).ready(function() {
+            $('.advanced-search button').on('click', function() {
+                if($('#terms').is(':checked')) {
+                    $("#search-advanced-docs").addClass("invisible");
+                    $("#search-advanced-terms").removeClass("invisible");
+                } else if ($('#documents').is(':checked')) {
+                    $("#search-advanced-terms").addClass("invisible");
+                    $("#search-advanced-docs").removeClass("invisible");
+                }
+            })
+        })
 
-</script>
+    </script>
 
 </body>
-
 </html>
