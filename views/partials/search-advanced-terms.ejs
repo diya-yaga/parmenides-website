@@ -14,11 +14,10 @@
         <label for="head-input">Head: </label>
         <input type="text" id="head-input">
         <select id="relSelect">
-            <option selected>Relation: </option>
-            <option>Noun</option>
-            <option>Adjective</option>
-            <option>Verb</option>
-            <option>Auxiliary</option>
+            <option value="">Relations</option>
+            <% for (var i = 0; i < rels.length; i++) { %>
+                <option value=<%= rels[i] %>><%= rels[i] %></option>
+            <% } %>
         </select> 
     </div>
     <div class="inputItem">
@@ -26,3 +25,11 @@
         <input type="text" id="dep-input">
     </div> 
   </div>
+
+  <script>
+    $(document).ready(function () {
+        $('#relSelect').selectize({
+            sortField: 'text'
+        });
+    });
+  </script>

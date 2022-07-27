@@ -2,11 +2,15 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const sqlite3 = require("sqlite3");
+const fs = require('fs');
 
 const app = express();
 
 let tableArr = [];
-let radioResult = 0;
+const rels = fs.readFileSync('rels.txt').toString().split('\n');
+for (i in rels) {
+    rels[i] = rels[i].trim();
+}
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -18,7 +22,8 @@ const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=
 
 app.get("/", function(req, res) {
     res.render("index", {
-        data: tableArr
+        data: tableArr,
+        rels: rels
     });
     
 });
@@ -29,7 +34,8 @@ app.get("/term-table", function(req, res) {
     }
     
     res.render("term-table", {
-        data: tableArr
+        data: tableArr,
+        rels: rels
     })
 });
 
@@ -40,7 +46,8 @@ app.get("/doc-table", function(req, res) {
     }
     
     res.render("doc-table", {
-        data: tableArr
+        data: tableArr,
+        rels: rels
     })
 });
 
@@ -226,7 +233,6 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
     })
 });
 
-
 app.get("/docs/:givenDoc", function(req, res) {
     var docID = req.params.givenDoc;
     radioResult = req.body.flexRadioDefault;
@@ -371,7 +377,6 @@ app.get("/docs/:givenDoc", function(req, res) {
         console.log('finished!');
     })
 });
-
 
 app.post("/", function(req, res) {
     

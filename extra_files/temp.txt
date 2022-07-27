@@ -1,27 +1,72 @@
-        var term2 = "";
-        var sRegExInput = new RegExp(term, "gi");
-        var res = content.replace(sRegExInput, function(match) {
-            term2 = matchCase(term, match)
-            return "<span class='highlight'>" + term2 + "</span>"
-        });
-
-        document.getElementById("documentContent").innerHTML = res;
-
-        document.getElementById('term').innerHTML = term2;
-
-        function matchCase(text, pattern) {
-            var result = '';
-
-            for(var i = 0; i < text.length; i++) {
-                var c = text.charAt(i);
-                var p = pattern.charCodeAt(i);
-
-                if(p >= 65 && p < 65 + 26) {
-                    result += c.toUpperCase();
-                } else {
-                    result += c.toLowerCase();
-                }
-            }
-
-            return result;
-        }
+'agent', 
+'csubj', 
+'nsubj',
+'dobj', 
+'csubjpass', 
+'nsubjpass', 
+'obj',
+'dative',
+'subtok',
+'mwe', 
+'goeswith',
+'fixed',
+'flat',
+'list',
+'parataxis',
+'predet',
+'nn',
+'compound',
+'nmod',
+'amod',
+'acl',
+'clf',
+'nummod',
+'nounmod',
+'npmod',
+'prep',
+'appos',
+'case',
+'conj',
+'preconj',
+'attr',
+'relcl',
+'npadvmod',
+'poss',
+'neg',
+'quantmod',
+'pobj',
+'pcomp',
+'iobj',
+'dative',
+'dobj',
+'oprd',
+'obj',
+'acomp',
+'ccomp',
+'xcomp',
+'advmod',
+'advcl',
+'obl',
+'mark',
+'agent',
+'nsubj',
+'nsubjpass',
+'csubj',
+'csubjpass',
+'cop',
+'aux',
+'auxpass',
+'cc',
+'dep',
+'discourse',
+'dislocated',
+'expl',
+'orphan',
+'reparandum',
+'vocative',
+'punct',
+'det',
+'prt',
+'intj',
+'meta',
+'root'
