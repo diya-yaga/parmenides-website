@@ -1,11 +1,14 @@
-.advancedTerms, .advancedDocs {
+#search-advanced-terms, #search-advanced-docs {
+    width: fit-content;
     outline: 1px solid;
     padding: 1rem;
-    margin: 2rem;
+    margin: auto;
+    margin-top: 1rem;
 }
 
 .inputItem {
     margin-bottom: 10px;
+    text-align: left;
 }
 label {
     display: inline-block;

@@ -12,6 +12,11 @@ for (i in rels) {
     rels[i] = rels[i].trim();
 }
 
+const pos = fs.readFileSync('pos.txt').toString().split('\n');
+for (i in pos) {
+    pos[i] = pos[i].trim();
+}
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
@@ -23,7 +28,8 @@ const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=
 app.get("/", function(req, res) {
     res.render("index", {
         data: tableArr,
-        rels: rels
+        rels: rels,
+        pos: pos
     });
     
 });
@@ -35,7 +41,8 @@ app.get("/term-table", function(req, res) {
     
     res.render("term-table", {
         data: tableArr,
-        rels: rels
+        rels: rels,
+        pos: pos
     })
 });
 
@@ -47,7 +54,8 @@ app.get("/doc-table", function(req, res) {
     
     res.render("doc-table", {
         data: tableArr,
-        rels: rels
+        rels: rels,
+        pos: pos
     })
 });
 

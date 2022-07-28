@@ -62,3 +62,13 @@ h1 {
     padding: 0 5%;
     font-size: 2rem;
 }
+
+.inputItem {
+    font-size: 1.5rem;
+}
+
+label {
+    display: inline-block;
+    width: 8rem !important;
+    text-align: right;
+}
