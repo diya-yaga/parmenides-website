@@ -4,18 +4,19 @@
         <div class="inputItem">
             <label></label>
             <select name="partOfSpeechSelect" id="partOfSpeechSelect">
-                <option selected value="pos">Part of Speech</option>
-                <option value="n">Noun</option>
-                <option value="adj">Adjective</option>
-                <option value="v">Verb</option>
-                <option value="aux">Auxiliary</option>
+                <option selected value="">Part of Speech</option>
+                <option value="NOUN">Noun</option>
+                <option value="ADJ">Adjective</option>
+                <option value="VERB">Verb</option>
+                <option value="AUX">Auxiliary</option>
+                <option value="PROPN">Proper Noun</option>
             </select>
         </div>
         <div class="inputItem">
             <label for="headInput">Head: </label>
             <input name="headInput" type="text" id="headInput">
             <select name="relSelect" id="relSelect">
-                <option value="rel">Relations</option>
+                <option value="">Relations</option>
                 <% for (var i = 0; i < rels.length; i++) { %>
                     <option value=<%= rels[i] %>><%= rels[i] %></option>
                 <% } %>

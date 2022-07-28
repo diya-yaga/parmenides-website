@@ -21,6 +21,16 @@
                 <span class="radio-button"><input type="radio" id="documents" value="Documents" class="form-check-input radio-button" name="flexRadioDefault" id="flexRadioDefault1" checked> Documents</span>
                 <br>    
             </div>
+            <br>
+            <div class="advanced-search">
+                <button type="button" class="btn btn-primary btn-sm">Advanced Search</button>
+            </div>
+        </div>
+        <div id="search-advanced-terms" class="invisible">
+            <%- include('partials/search-advanced-terms') -%>
+        </div>
+        <div id="search-advanced-docs" class="invisible">
+            <%- include('partials/search-advanced-docs') -%>
         </div>
     </form>
     <br>
@@ -52,5 +62,19 @@
             <% } %>
         </table>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('.advanced-search button').on('click', function() {
+                if($('#terms').is(':checked')) {
+                    $("#search-advanced-docs").addClass("invisible");
+                    $("#search-advanced-terms").removeClass("invisible");
+                } else if ($('#documents').is(':checked')) {
+                    $("#search-advanced-terms").addClass("invisible");
+                    $("#search-advanced-docs").removeClass("invisible");
+                }
+            })
+        })
+
+    </script>
 </body>
 </html>

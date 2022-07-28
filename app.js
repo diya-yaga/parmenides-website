@@ -379,34 +379,11 @@ app.get("/docs/:givenDoc", function(req, res) {
 });
 
 app.post("/", function(req, res) {
-    var title = req.body.titleInput;
-    var journal = req.body.journalInput;
     var authors = [req.body.author];
-
     for (var i = 2; i <= req.body.numAuthors; i++) {
         var tempAuth = req.body[`author_${i}`];
         authors.push(tempAuth);
-    }
-
-    var pos = req.body.partOfSpeechSelect;
-    var head = req.body.headInput;
-    var rel = req.body.relSelect;
-    var dep = req.body.depInput;
-
-    console.log("pos: " + pos);
-    console.log("head: " + head);
-    console.log("rel: " + rel);
-    console.log("dep: " + dep);
-    console.log();
-    console.log("title: " + title);
-    console.log("journal: " + journal);
-    console.log("authors: ");
-    for (var i = 0; i < authors.length; i++) {
-        console.log(authors[i]);
-    }
-    console.log("------");
-    
-
+    } 
 
     tableArr = [];
     var myCallback = function(data) {
@@ -427,11 +404,15 @@ app.post("/", function(req, res) {
     }
 
     var radioResult = req.body.flexRadioDefault;
-    if (radioResult == 'Terms') {
-        usingItNow(myCallback, "SELECT sentence.content, term.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, term.pos, term.id FROM sentence JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON term.id = phrase.term_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id WHERE term.representation = '" + req.body.word + "' OR nlp_phrase LIKE '%" + req.body.word + "%' GROUP BY document.id ORDER BY term.representation DESC;");
+    var query;
+    if (radioResult == 'Terms') { 
+        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
+        usingItNow(myCallback, query);
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
-        usingItNow(myCallback, "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' OR nlp_phrase LIKE '%" + req.body.word + "%' GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;");
+        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.titleInput, req.body.journalInput, authors]);
+        console.log(query);
+        usingItNow(myCallback, query);
         res.redirect("/doc-table");
     }
     
@@ -448,3 +429,43 @@ app.post("/doc-table", function(req, res) {
 app.listen(3000, function() {
     console.log("Server started on port 3000");
 });
+
+function generateQuery (givenTerm, selected, data) {
+    var sql = "";
+    if (selected == 'Terms') {
+        sql = "SELECT sentence.content,tempTerm.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, tempTerm.pos, tempTerm.rel, tempTerm.id, tempHead.representation, tempDep.representation FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE (tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '" + givenTerm + "')";
+
+        if (data[0] != '') {
+            sql +="AND tempTerm.pos = '" + data[0] + "'"; 
+        }
+        if (data[1] != '') {
+            sql += "AND TRIM(tempHead.representation) = '" + data[1] + "'";
+        }
+        if (data[2] != '') {
+            sql += "AND TRIM(tempDep.representation) = '" + data[2] + "'";
+        }
+        if (data[3] != '') {
+            sql += "AND tempTerm.rel = '" + data[3] + "'";
+        }
+
+        sql += "GROUP BY document.id ORDER BY tempTerm.representation DESC;";
+    } else if (selected == 'Documents') {
+        sql = "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id JOIN metadata ON metadata.document_id = document.id WHERE (term.representation = '" + givenTerm + "' OR nlp_phrase LIKE '%" + givenTerm + "%')";
+
+        if (data[0] != '') {
+            sql += "AND document.title LIKE '" + data[0] + "'";
+        }
+        if (data[1] != '') {
+            sql += "AND (metadata.key = 'journal' AND metadata.value LIKE '" + data[1] + "')";
+        }
+        if (data[2][0] != '') {
+            sql += "AND (author.name LIKE '" + data[2][0] +"' ";
+            for (var i = 1; i < data[2].length; i++) {
+                sql += "OR author.name LIKE '"+ data[2][i] +"'";
+            }
+            sql += ")";
+        }
+        sql += "GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;";
+    }
+    return sql;
+};
