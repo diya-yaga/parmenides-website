@@ -1,15 +1,49 @@
 <link rel="stylesheet" href="/css/advanced-search.css">
-<div class="advancedDocs">
-    <div class="inputItem">
-        <label for="title">Title: </label>
-        <input type="text" id="title">
+
+    <div class="advancedDocs">
+        <div class="inputItem">
+            <label for="title">Title: </label>
+            <input name="titleInput" type="text" id="title">
+        </div>
+    
+        <div class="inputItem">
+            <label for="journal">Journal: </label>
+            <input name="journalInput" type="text" id="journal">
+        </div> 
+    
+        <div class="inputItem">
+            <label for="author">Author: </label>
+            <input name="author" type="text" class="author">
+            <button class="add">Add</button>
+            <button class="remove">Remove</button>
+        </div>
+        
+        <div id="new_chq"></div>
+        <input type="hidden" name="numAuthors" value="1" id="total_chq">
+        
     </div>
-    <div class="inputItem">
-        <label for="author">Author: </label>
-        <input type="text" class="author">
-    </div>
-    <div class="inputItem">
-        <label for="journal">Journal: </label>
-        <input type="text" id="journal">
-    </div> 
-  </div>
+
+
+
+<script>
+    $('.add').on('click', add);
+    $('.remove').on('click', remove);
+
+    function add() {
+        var new_chq_no = parseInt($('#total_chq').val()) + 1;
+        var new_input = "<div class='inputItem' id='new_" + new_chq_no + "'><label>Author: </label> <input name='author_" + new_chq_no + "' type='text' class='author'></div>";
+
+	    $('#new_chq').append(new_input);
+        $('#total_chq').val(new_chq_no);
+    }
+
+    function remove() {
+        var last_chq_no = $('#total_chq').val();
+
+        if (last_chq_no > 1) {
+            $('#new_' + last_chq_no).remove();
+            $('#total_chq').val(last_chq_no - 1);
+        }
+    }
+
+</script>

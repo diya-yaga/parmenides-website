@@ -25,12 +25,16 @@
                 <button type="button" class="btn btn-primary btn-lg">Advanced Search</button>
             </div>
         </div>
-        <div id="search-advanced-terms" class="invisible">
-            <%- include('partials/search-advanced-terms') -%>
-        </div>
-        <div id="search-advanced-docs" class="invisible">
-            <%- include('partials/search-advanced-docs') -%>
-        </div>
+        <form action="/" method="post">
+            <div id="search-advanced-terms" class="invisible">
+                <%- include('partials/search-advanced-terms') -%>
+            </div>
+            <div id="search-advanced-docs" class="invisible">
+                <%- include('partials/search-advanced-docs') -%>
+            </div>
+        </form>
+               
+
     </form>
 
     <script>

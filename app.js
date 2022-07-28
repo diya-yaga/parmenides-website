@@ -379,7 +379,35 @@ app.get("/docs/:givenDoc", function(req, res) {
 });
 
 app.post("/", function(req, res) {
+    var title = req.body.titleInput;
+    var journal = req.body.journalInput;
+    var authors = [req.body.author];
+
+    for (var i = 2; i <= req.body.numAuthors; i++) {
+        var tempAuth = req.body[`author_${i}`];
+        authors.push(tempAuth);
+    }
+
+    var pos = req.body.partOfSpeechSelect;
+    var head = req.body.headInput;
+    var rel = req.body.relSelect;
+    var dep = req.body.depInput;
+
+    console.log("pos: " + pos);
+    console.log("head: " + head);
+    console.log("rel: " + rel);
+    console.log("dep: " + dep);
+    console.log();
+    console.log("title: " + title);
+    console.log("journal: " + journal);
+    console.log("authors: ");
+    for (var i = 0; i < authors.length; i++) {
+        console.log(authors[i]);
+    }
+    console.log("------");
     
+
+
     tableArr = [];
     var myCallback = function(data) {
         for (var i = 0; i < data.length; i++) {
@@ -404,7 +432,7 @@ app.post("/", function(req, res) {
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
         usingItNow(myCallback, "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE term.representation = '" + req.body.word + "' OR nlp_phrase LIKE '%" + req.body.word + "%' GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;");
-        res.redirect("/doc-table")
+        res.redirect("/doc-table");
     }
     
 });
@@ -420,4 +448,3 @@ app.post("/doc-table", function(req, res) {
 app.listen(3000, function() {
     console.log("Server started on port 3000");
 });
-

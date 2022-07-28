@@ -1,30 +1,33 @@
 <link rel="stylesheet" href="/css/advanced-search.css">
-<div class="advancedTerms">
-    <div class="inputItem">
-        <label></label>
-        <select id="partOfSpeechSelect">
-            <option selected>Part of Speech</option>
-            <option>Noun</option>
-            <option>Adjective</option>
-            <option>Verb</option>
-            <option>Auxiliary</option>
-        </select>
+
+    <div class="advancedTerms">
+        <div class="inputItem">
+            <label></label>
+            <select name="partOfSpeechSelect" id="partOfSpeechSelect">
+                <option selected value="pos">Part of Speech</option>
+                <option value="n">Noun</option>
+                <option value="adj">Adjective</option>
+                <option value="v">Verb</option>
+                <option value="aux">Auxiliary</option>
+            </select>
+        </div>
+        <div class="inputItem">
+            <label for="headInput">Head: </label>
+            <input name="headInput" type="text" id="headInput">
+            <select name="relSelect" id="relSelect">
+                <option value="rel">Relations</option>
+                <% for (var i = 0; i < rels.length; i++) { %>
+                    <option value=<%= rels[i] %>><%= rels[i] %></option>
+                <% } %>
+            </select> 
+        </div>
+        <div class="inputItem">
+            <label for="depInput">Dependent: </label>
+            <input name="depInput" type="text" id="depInput">
+        </div> 
     </div>
-    <div class="inputItem">
-        <label for="head-input">Head: </label>
-        <input type="text" id="head-input">
-        <select id="relSelect">
-            <option value="">Relations</option>
-            <% for (var i = 0; i < rels.length; i++) { %>
-                <option value=<%= rels[i] %>><%= rels[i] %></option>
-            <% } %>
-        </select> 
-    </div>
-    <div class="inputItem">
-        <label for="dep-input">Dependent: </label>
-        <input type="text" id="dep-input">
-    </div> 
-  </div>
+
+
 
   <script>
     $(document).ready(function () {
