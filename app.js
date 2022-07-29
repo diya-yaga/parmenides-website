@@ -415,6 +415,7 @@ app.post("/", function(req, res) {
     var query;
     if (radioResult == 'Terms') { 
         query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
+        console.log(query);
         usingItNow(myCallback, query);
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
@@ -440,8 +441,27 @@ app.listen(3000, function() {
 
 function generateQuery (givenTerm, selected, data) {
     var sql = "";
+    var hasData = false;
+    for (var i = 0; i < data.length; i++) {
+        if (selected == 'Documents' && i == 2) {
+            if (data[2].length > 0) {
+                hasData = true;
+            }
+        } else {
+            if (data[i].length > 0) {
+                hasData = true;
+            }
+        }
+    }
     if (selected == 'Terms') {
-        sql = "SELECT sentence.content,tempTerm.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, tempTerm.pos, tempTerm.rel, tempTerm.id, tempHead.representation, tempDep.representation FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE (tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '" + givenTerm + "')";
+        sql = "SELECT sentence.content,tempTerm.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, tempTerm.pos, IFNULL(tempTerm.rel, ''), tempTerm.id, IFNULL(tempHead.representation, ''), IFNULL(tempDep.representation, '') FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE ";
+        if (givenTerm != '') {
+            sql += "(tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '%" + givenTerm + "%') ";
+        } else if (givenTerm == '' && hasData) {
+            sql += "1=1 ";
+        } else if (givenTerm == '' && !hasData) {
+            sql += "(tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '" + givenTerm + "') ";
+        }
 
         if (data[0] != '') {
             sql +="AND tempTerm.pos = '" + data[0] + "'"; 
@@ -456,24 +476,32 @@ function generateQuery (givenTerm, selected, data) {
             sql += "AND tempTerm.rel = '" + data[3] + "'";
         }
 
-        sql += "GROUP BY document.id ORDER BY tempTerm.representation DESC;";
+        sql += "GROUP BY document.id ORDER BY tempTerm.representation;";
     } else if (selected == 'Documents') {
-        sql = "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id JOIN metadata ON metadata.document_id = document.id WHERE (term.representation = '" + givenTerm + "' OR nlp_phrase LIKE '%" + givenTerm + "%')";
+        sql = "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id JOIN metadata ON metadata.document_id = document.id WHERE ";
+        if (givenTerm != '') {
+            sql += "(term.representation = '" + givenTerm + "' OR nlp_phrase LIKE '%" + givenTerm + "%') ";
+        } else if (givenTerm == '' && hasData) {
+            sql += "1=1 ";
+        } else if (givenTerm == '' && !hasData) {
+            sql += "(term.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '" + givenTerm + "') ";
+        }
+
 
         if (data[0] != '') {
-            sql += "AND document.title LIKE '" + data[0] + "'";
+            sql += "AND document.title LIKE TRIM('" + data[0] + "') ";
         }
         if (data[1] != '') {
-            sql += "AND (metadata.key = 'journal' AND metadata.value LIKE '" + data[1] + "')";
+            sql += "AND (metadata.key = 'journal' AND metadata.value LIKE TRIM('" + data[1] + "')) ";
         }
         if (data[2][0] != '') {
-            sql += "AND (author.name LIKE '" + data[2][0] +"' ";
+            sql += "AND (author.name LIKE TRIM('" + data[2][0] +"')";
             for (var i = 1; i < data[2].length; i++) {
-                sql += "OR author.name LIKE '"+ data[2][i] +"'";
+                sql += " OR author.name LIKE TRIM('"+ data[2][i] +"')";
             }
             sql += ")";
         }
-        sql += "GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;";
+        sql += " GROUP BY document.id ORDER BY num_occurrences_total DESC, document.title;";
     }
     return sql;
 };
