@@ -5,11 +5,17 @@
             <label for="title">Title: </label>
             <input name="titleInput" type="text" id="title">
         </div>
-    
+
         <div class="inputItem">
-            <label for="journal">Journal: </label>
-            <input name="journalInput" type="text" id="journal">
-        </div> 
+            <label for="metadata">Metadata: </label>
+            <select name="metadataKeySelect" id="metadataKeySelect">
+                <option selected value="">Key</option>
+                <% for (var i = 0; i < keys.length; i++) { %>
+                    <option value=<%= keys[i] %>><%= keys[i] %></option>
+                <% } %>
+            </select>
+            <input name="metadataValue" type="text">
+        </div>
     
         <div class="inputItem">
             <label for="author">Author: </label>
@@ -26,8 +32,14 @@
 
 
 <script>
-    $('.add').on('click', add);
-    $('.remove').on('click', remove);
+    $(document).ready(function () {
+        $('#metadataKeySelect').selectize({
+            sortField: 'text'
+        });
+
+        $('.add').on('click', add);
+        $('.remove').on('click', remove);
+    });
 
     function add() {
         var new_chq_no = parseInt($('#total_chq').val()) + 1;

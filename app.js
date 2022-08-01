@@ -5,6 +5,13 @@ const sqlite3 = require("sqlite3");
 const fs = require('fs');
 
 const app = express();
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static("public"));
+
+const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=>{
+    if (err) return console.error(err.message);
+});
 
 let tableArr = [];
 const rels = fs.readFileSync('rels.txt').toString().split('\n');
@@ -17,19 +24,27 @@ for (i in pos) {
     pos[i] = pos[i].trim();
 }
 
-app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("public"));
-
-const db = new sqlite3.Database('./parmenides.db',sqlite3.OPEN_READWRITE, (err)=>{
-    if (err) return console.error(err.message);
+const keys = [];
+var sql = "SELECT metadata.key FROM metadata GROUP BY metadata.key;";
+db.all(sql, [], (err, rows) => {
+    if (err) return callback(err.message);
+    rows.forEach((row) => {
+        var key = JSON.stringify(row).substring(8, JSON.stringify(row).length-2);
+        // if (key != 'pdf') {
+        //     key = key.substring(0, 1).toUpperCase() + key.substring(1);
+        // } else {
+        //     key = key.toUpperCase();
+        // }
+        keys.push(key);    
+    });    
 });
 
 app.get("/", function(req, res) {
     res.render("index", {
         data: tableArr,
         rels: rels,
-        pos: pos
+        pos: pos,
+        keys: keys
     });
     
 });
@@ -42,7 +57,8 @@ app.get("/term-table", function(req, res) {
     res.render("term-table", {
         data: tableArr,
         rels: rels,
-        pos: pos
+        pos: pos,
+        keys: keys
     })
 });
 
@@ -55,7 +71,8 @@ app.get("/doc-table", function(req, res) {
     res.render("doc-table", {
         data: tableArr,
         rels: rels,
-        pos: pos
+        pos: pos,
+        keys: keys
     })
 });
 
@@ -391,7 +408,9 @@ app.post("/", function(req, res) {
     for (var i = 2; i <= req.body.numAuthors; i++) {
         var tempAuth = req.body[`author_${i}`];
         authors.push(tempAuth);
-    } 
+    }
+    var metadata = [req.body.metadataKeySelect, req.body.metadataValue];
+    console.log(metadata);
 
     tableArr = [];
     var myCallback = function(data) {
@@ -414,12 +433,12 @@ app.post("/", function(req, res) {
     var radioResult = req.body.flexRadioDefault;
     var query;
     if (radioResult == 'Terms') { 
-        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
+        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect]);
         console.log(query);
         usingItNow(myCallback, query);
         res.redirect("/term-table");
     } else if (radioResult == 'Documents') {
-        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.titleInput, req.body.journalInput, authors]);
+        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.titleInput, metadata, authors]);
         console.log(query);
         usingItNow(myCallback, query);
         res.redirect("/doc-table");
@@ -443,8 +462,8 @@ function generateQuery (givenTerm, selected, data) {
     var sql = "";
     var hasData = false;
     for (var i = 0; i < data.length; i++) {
-        if (selected == 'Documents' && i == 2) {
-            if (data[2].length > 0) {
+        if (selected == 'Documents' && (i == 1 || i == 2)) {
+            if (data[i].length > 0) {
                 hasData = true;
             }
         } else {
@@ -455,12 +474,10 @@ function generateQuery (givenTerm, selected, data) {
     }
     if (selected == 'Terms') {
         sql = "SELECT sentence.content,tempTerm.representation, SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase, tempTerm.pos, IFNULL(tempTerm.rel, ''), tempTerm.id, IFNULL(tempHead.representation, ''), IFNULL(tempDep.representation, '') FROM term tempTerm JOIN phrase ON tempTerm.id = phrase.term_id JOIN sentence ON sentence.id = phrase.sentence_id JOIN section ON section.id = sentence.section_id JOIN document ON document.id = section.document_id LEFT JOIN term tempHead ON tempTerm.head_id = tempHead.id LEFT JOIN term tempDep ON tempTerm.dep_id = tempDep.id WHERE ";
-        if (givenTerm != '') {
-            sql += "(tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '%" + givenTerm + "%') ";
+        if (givenTerm != '' || (givenTerm == '' && !hasData)) {
+            sql += "(tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '" + givenTerm + "') ";
         } else if (givenTerm == '' && hasData) {
             sql += "1=1 ";
-        } else if (givenTerm == '' && !hasData) {
-            sql += "(tempTerm.representation = '" + givenTerm + "' OR TRIM(nlp_phrase) LIKE '" + givenTerm + "') ";
         }
 
         if (data[0] != '') {
@@ -476,7 +493,7 @@ function generateQuery (givenTerm, selected, data) {
             sql += "AND tempTerm.rel = '" + data[3] + "'";
         }
 
-        sql += "GROUP BY document.id ORDER BY tempTerm.representation;";
+        sql += "GROUP BY tempTerm.representation, tempTerm.pos ORDER BY tempTerm.representation;";
     } else if (selected == 'Documents') {
         sql = "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id JOIN metadata ON metadata.document_id = document.id WHERE ";
         if (givenTerm != '') {
@@ -491,8 +508,8 @@ function generateQuery (givenTerm, selected, data) {
         if (data[0] != '') {
             sql += "AND document.title LIKE TRIM('" + data[0] + "') ";
         }
-        if (data[1] != '') {
-            sql += "AND (metadata.key = 'journal' AND metadata.value LIKE TRIM('" + data[1] + "')) ";
+        if (data[1][0] != '' && data[1][1] != '') {
+            sql += "AND (metadata.key = '" + data[1][0] + "' AND metadata.value LIKE TRIM('" + data[1][1] + "'))";
         }
         if (data[2][0] != '') {
             sql += "AND (author.name LIKE TRIM('" + data[2][0] +"')";
