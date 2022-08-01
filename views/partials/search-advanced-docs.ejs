@@ -5,17 +5,23 @@
             <label for="title">Title: </label>
             <input name="titleInput" type="text" id="title">
         </div>
-
+    
         <div class="inputItem">
-            <label for="metadata">Metadata: </label>
-            <select name="metadataKeySelect" id="metadataKeySelect">
+            <label for="metadataValue">Metadata: </label>
+            <select name="metadataKeySelectInput" id="metadataKeySelect">
                 <option selected value="">Key</option>
                 <% for (var i = 0; i < keys.length; i++) { %>
-                    <option value=<%= keys[i] %>><%= keys[i] %></option>
+                    <option value=<%= keys[i] %>>
+                        <% if (keys[i] != 'pdf') { %>
+                            <%= keys[i].substring(0, 1).toUpperCase() + keys[i].substring(1) %>
+                        <% } else { %>
+                            <%= keys[i].toUpperCase() %>
+                        <% } %>
+                    </option>
                 <% } %>
-            </select>
-            <input name="metadataValue" type="text">
-        </div>
+            </select> 
+            <input name="metadataValueInput" type="text" id="metadataValue">
+        </div> 
     
         <div class="inputItem">
             <label for="author">Author: </label>
@@ -29,17 +35,9 @@
         
     </div>
 
-
-
 <script>
-    $(document).ready(function () {
-        $('#metadataKeySelect').selectize({
-            sortField: 'text'
-        });
-
-        $('.add').on('click', add);
-        $('.remove').on('click', remove);
-    });
+    $('.add').on('click', add);
+    $('.remove').on('click', remove);
 
     function add() {
         var new_chq_no = parseInt($('#total_chq').val()) + 1;
