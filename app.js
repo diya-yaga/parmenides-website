@@ -405,8 +405,14 @@ app.post("/", function(req, res) {
         authors.push(tempAuth);
     } 
 
-    var metadata = [req.body.metadataKeySelectInput, req.body.metadataValueInput];
-
+    var metadata = [[req.body.md_key, req.body.md_input]];
+    console.log('key: ' + req.body.mdSelect + ', value: ' + req.body.mdInput);
+    for (var i = 2; i <= req.body.numMd; i++) {
+        var tempMd = [req.body[`md_key_${i}`], req.body[`md_input_${i}`]];
+        console.log('key: ' + req.body[`md_key_${i}`] + ', value: ' + req.body[`md_input_${i}`]);
+        metadata.push(tempMd);
+    } 
+    console.log(metadata);
     tableArr = [];
     var myCallback = function(data) {
         for (var i = 0; i < data.length; i++) {
@@ -505,10 +511,14 @@ function generateQuery (givenTerm, selected, data) {
         if (data[0] != '') {
             sql += "AND document.title LIKE TRIM('" + data[0] + "') ";
         }
-        if (data[1][0] != '' || data[1][1] != '') {
-            sql += "AND metadata.key LIKE TRIM('" + data[1][0] + "') ";
-            sql += "AND metadata.value LIKE TRIM('" + data[1][1] + "') ";
+        if (data[1][0][0] != '' || data[1][0][1] != '') {
+            sql += "AND ((metadata.key LIKE TRIM('" + data[1][0][0] + "') AND metadata.value LIKE TRIM('" + data[1][0][1] + "'))";
+            for (var i = 1; i < data[1].length; i++) {
+                sql += " OR (metadata.key LIKE TRIM('" + data[1][i][0] + "') AND metadata.value LIKE TRIM('" + data[1][i][1] + "'))";
+            }
+            sql += ")";
         }
+        
         if (data[2][0] != '') {
             sql += "AND (author.name LIKE TRIM('" + data[2][0] +"')";
             for (var i = 1; i < data[2].length; i++) {

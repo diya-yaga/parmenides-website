@@ -5,11 +5,11 @@
             <label for="title">Title: </label>
             <input name="titleInput" type="text" id="title">
         </div>
-    
-        <div class="inputItem">
-            <label for="metadataValue">Metadata: </label>
-            <select name="metadataKeySelectInput" id="metadataKeySelect">
-                <option selected value="">Key</option>
+
+        <div class='inputItem'>
+            <label for="md">Metadata: </label>
+            <select name='md_key'>
+                <option selected value=''>Key</option>
                 <% for (var i = 0; i < keys.length; i++) { %>
                     <option value=<%= keys[i] %>>
                         <% if (keys[i] != 'pdf') { %>
@@ -19,41 +19,69 @@
                         <% } %>
                     </option>
                 <% } %>
-            </select> 
-            <input name="metadataValueInput" type="text" id="metadataValue">
-        </div> 
-    
+            </select>
+            <input name="md_input" type="text" class="md">
+            <button type='button' id="addMd">Add</button>
+            <button type='button' id="removeMd">Remove</button>
+        </div>
+        <div id="new_chq_md"></div>
+        <input type="hidden" name="numMd" value="1" id="total_chq_md">
+        
+        
         <div class="inputItem">
             <label for="author">Author: </label>
             <input name="author" type="text" class="author">
-            <button type='button' class="add">Add</button>
-            <button type='button' class="remove">Remove</button>
+            <button type='button' id="addAuthor">Add</button>
+            <button type='button' id="removeAuthor">Remove</button>
         </div>
         
-        <div id="new_chq"></div>
-        <input type="hidden" name="numAuthors" value="1" id="total_chq">
+        <div id="new_chq_auth"></div>
+        <input type="hidden" name="numAuthors" value="1" id="total_chq_auth">
+
         
     </div>
 
 <script>
-    $('.add').on('click', add);
-    $('.remove').on('click', remove);
+    $('#addAuthor').on('click', addAuthor);
+    $('#removeAuthor').on('click', removeAuthor);
 
-    function add() {
-        var new_chq_no = parseInt($('#total_chq').val()) + 1;
-        var new_input = "<div class='inputItem' id='new_" + new_chq_no + "'><label>Author: </label> <input name='author_" + new_chq_no + "' type='text' class='author'></div>";
+    function addAuthor() {
+        var new_chq_no = parseInt($('#total_chq_auth').val()) + 1;
+        var new_input = "<div class='inputItem' id='new_auth_" + new_chq_no + "'><label>Author: </label> <input name='author_" + new_chq_no + "' type='text' class='author'></div>";
 
-	    $('#new_chq').append(new_input);
-        $('#total_chq').val(new_chq_no);
+        $('#new_chq_auth').append(new_input);
+        $('#total_chq_auth').val(new_chq_no);
     }
 
-    function remove() {
-        var last_chq_no = $('#total_chq').val();
+    function removeAuthor() {
+        var last_chq_no = $('#total_chq_auth').val();
 
         if (last_chq_no > 1) {
-            $('#new_' + last_chq_no).remove();
-            $('#total_chq').val(last_chq_no - 1);
+            $('#new_auth_' + last_chq_no).remove();
+            $('#total_chq_auth').val(last_chq_no - 1);
         }
     }
+    
+    
+    $('#addMd').on('click', addMd);
+    $('#removeMd').on('click', removeMd);
+
+function addMd() {
+        var new_chq_no = parseInt($('#total_chq_md').val()) + 1;
+        var new_input = "<div class='inputItem' id='new_md_" + new_chq_no + "'><label>Metadata: </label><select name='md_key_" + new_chq_no + "'><option selected value=''>Key</option><% for (var i = 0; i < keys.length; i++) { %><option value=<%= keys[i] %>><% if (keys[i] != 'pdf') { %><%= keys[i].substring(0, 1).toUpperCase() + keys[i].substring(1) %><% } else { %><%= keys[i].toUpperCase() %><% } %></option><% } %></select> <input name='md_input_" + new_chq_no + "' type='text' class='md'></div>";
+
+        $('#new_chq_md').append(new_input);
+        $('#total_chq_md').val(new_chq_no);
+}
+
+function removeMd() {
+    var last_chq_no = $('#total_chq_md').val();
+
+    if (last_chq_no > 1) {
+        $('#new_md_' + last_chq_no).remove();
+        $('#total_chq_md').val(last_chq_no - 1);
+    }
+}
+
 
 </script>
