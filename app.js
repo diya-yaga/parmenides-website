@@ -3,8 +3,10 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const sqlite3 = require("sqlite3");
 const fs = require('fs');
+const {spawn} = require('child_process');
 
 const app = express();
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
@@ -33,6 +35,16 @@ db.all(sql, [], (err, rows) => {
         keys.push(key);    
     });    
 });
+
+app.get("/python-example", (req, res) => {
+    var dataToSend;
+    const python = spawn('python', ['normalize-single-term.py', 'system of closures']);
+    python.stdout.on('data', function(data) {
+        dataToSend = data.toString();
+        res.send(dataToSend);
+        
+    });
+})
 
 app.get("/", function(req, res) {
     res.render("index", {
