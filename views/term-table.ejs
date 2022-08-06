@@ -37,34 +37,24 @@
     <div id="term-table">
         <table class="table table-bordered table-hover">
             <thead class="table-light">
-                <tr>
-                    <th>Content</th>
-                    <th>NLP Phrase</th>
-                    <th>Part of Speech</th>
-                    <th>Term Page</th>
-                </tr>
+                <th>Content</th>
+                <th>NLP Phrase</th>
+                <th>Part of Speech</th>
+                <th>Term Page</th>
             </thead>
-            <% for(var i = 0; i < data.length; i++) { %>
-                <tr class="term-tr">
-                    <% var temp = data[i].split('","') %>
-                    <% for(var j = 0; j < temp.length; j++) { %>
+            <% for (var i = 0; i < data.length; i++) { %>
+                <% var row = data[i].split('","') %>
+                <tr>
+                    <% for (var j = 0; j < row.length; j++) { %>
                         <% if (j == 0) { %>
-                            <td>
-                                <%= temp[j].substring(12) %>
-                            </td>
+                            <td><%= row[j].substring(12) %></td> 
                         <% } else if (j == 2) { %>
-                            <td class='term-td'>
-                                <%= temp[j].substring(13) %>
-                            </td>
+                            <td class="term-td"><%= row[j].substring(13) %></td> 
                         <% } else if (j == 3) { %>
-                            <td>
-                                <%= temp[j].substring(6) %>
-                            </td>
+                            <td><%= row[j].substring(6) %></td> 
                         <% } else if (j == 5) { %>
-                            <td>
-                                <% var url = "/terms/" + temp[j].substring(5) %>
-                                <a href= <%= url %> >Term Page</a>
-                            </td>
+                            <% var url = "/terms/" + row[j].substring(5) %>
+                            <td><a href=<%= url %>>Term Page</a></td> 
                         <% } %>
                     <% } %>
                 </tr>

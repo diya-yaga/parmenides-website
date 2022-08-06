@@ -36,31 +36,6 @@ db.all(sql, [], (err, rows) => {
     });    
 });
 
-app.get("/python-example/:term", (req, res) => {
-    
-    res.render('python', {
-        data: 'data'
-    });
-});
-
-app.post("/python-example/:term", (req, res) => {
-    const python = spawn("python", ["normalize-single-term.py", req.params.term]);
-    let processed_data = '';
-
-    python.stdout.on('data', function(data) {
-        processed_data = data.toString();
-    })
-    python.stderr.on('data', data => {
-        console.error('stderr');
-    })
-    python.on('exit', (code) => {
-        console.log(processed_data)
-        res.render('python', {
-            data: processed_data
-        });
-    })
-});
-
 app.get("/", function(req, res) {
     res.render("index", {
         data: tableArr,
