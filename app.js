@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const sqlite3 = require("sqlite3");
 const fs = require('fs');
-const {spawn} = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 
@@ -36,15 +36,30 @@ db.all(sql, [], (err, rows) => {
     });    
 });
 
-app.get("/python-example", (req, res) => {
-    var dataToSend;
-    const python = spawn('python', ['normalize-single-term.py', 'system of closures']);
-    python.stdout.on('data', function(data) {
-        dataToSend = data.toString();
-        res.send(dataToSend);
-        
+app.get("/python-example/:term", (req, res) => {
+    
+    res.render('python', {
+        data: 'data'
     });
-})
+});
+
+app.post("/python-example/:term", (req, res) => {
+    const python = spawn("python", ["normalize-single-term.py", req.params.term]);
+    let processed_data = '';
+
+    python.stdout.on('data', function(data) {
+        processed_data = data.toString();
+    })
+    python.stderr.on('data', data => {
+        console.error('stderr');
+    })
+    python.on('exit', (code) => {
+        console.log(processed_data)
+        res.render('python', {
+            data: processed_data
+        });
+    })
+});
 
 app.get("/", function(req, res) {
     res.render("index", {
@@ -240,19 +255,35 @@ app.get("/termindoc/:term/:givenDoc", function(req, res) {
         });
     }
 
+    function getOtherVersions(callback) {
+        var allTerms = [];
+        var sql4 = "SELECT SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS nlp_phrase FROM sentence JOIN section ON sentence.section_id = section.id JOIN document ON document.id = section.document_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id WHERE document.id = '" + docID + "' AND term.representation = (SELECT term.representation FROM term WHERE term.id = '" + termID + "') GROUP BY nlp_phrase ORDER BY sentence.order_sentences;";
+        db.all(sql4, [], (err, rows) => {
+            if (err) return callback(err.message);
+            rows.forEach((row) => {
+                allTerms.push(JSON.stringify(row).substring(16, JSON.stringify(row).length-2));
+            
+            });
+            callback(allTerms);   
+        });
+    }
+
     function runQueriesInOrder(callback) {
         alterTable(function(temp) {
             getDocInfo(function(docInfo) {
                 getDocContent(function(docContent) {
                     getTermRep(function(terms) {
-                        res.render('term-in-doc-display', {
-                            termID: termID,
-                            term: terms,
-                            docTitle: docInfo,
-                            docUrl: '/docs/' + docID,
-                            content: docContent
-                        });
-                        allDone(callback);
+                        getOtherVersions(function(otherTerms) {
+                            res.render('term-in-doc-display', {
+                                termID: termID,
+                                term: terms,
+                                docTitle: docInfo,
+                                docUrl: '/docs/' + docID,
+                                content: docContent,
+                                otherTerms: otherTerms
+                            });
+                            allDone(callback);
+                        })
                     })
                 })
             })
@@ -442,30 +473,32 @@ app.post("/", function(req, res) {
             callback(arr);
         });
     }
-    console.log();
     var radioResult = req.body.flexRadioDefault;
     var query;
-    if (radioResult == 'Terms') { 
-        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
-        console.log(query);
-        usingItNow(myCallback, query);
-        res.redirect("/term-table");
-    } else if (radioResult == 'Documents') {
-        query = generateQuery(req.body.word, req.body.flexRadioDefault, [req.body.titleInput, metadata, authors, dates]);
-        console.log(query);
-        usingItNow(myCallback, query);
-        res.redirect("/doc-table");
-    }
-    
+    const python = spawn("python", ["normalize-single-term.py", req.body.word]);
+    let processed_data = '';
+
+    python.stdout.on('data', function(data) {
+        processed_data = data.toString();
+    })
+    python.stderr.on('data', data => {
+        console.error('stderr');
+    })
+    python.on('exit', (code) => {
+        console.log(processed_data)
+        if (radioResult == 'Terms') { 
+            query = generateQuery(processed_data.trim(), req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
+            console.log(query);
+            usingItNow(myCallback, query);
+            res.redirect("/term-table");
+        } else if (radioResult == 'Documents') {
+            query = generateQuery(processed_data.trim(), req.body.flexRadioDefault, [req.body.titleInput, metadata, authors, dates]);
+            console.log(query);
+            usingItNow(myCallback, query);
+            res.redirect("/doc-table");
+        }
+    })
 });
-
-app.post("/term-table", function(req, res) {
-    console.log("my word: " + req.body.word);
-})
-
-app.post("/doc-table", function(req, res) {
-    console.log(10);
-})
 
 app.listen(3000, function() {
     console.log("Server started on port 3000");
@@ -504,7 +537,7 @@ function generateQuery (givenTerm, selected, data) {
     } else if (selected == 'Documents') {
         sql = "SELECT document.title, author.name AS 'author', document.published AS 'pubDate', document.id, term.id AS 'term_id', SUBSTRING(sentence.content, phrase.start, phrase.end - phrase.start + 1) AS 'nlp_phrase', COUNT(term.representation) AS 'num_occurrences_total' FROM document JOIN authored ON document.id = authored.document_id JOIN author ON author.id = authored.author_id JOIN section ON document.id = section.document_id JOIN sentence ON section.id = sentence.section_id JOIN phrase ON sentence.id = phrase.sentence_id JOIN term ON phrase.term_id = term.id JOIN metadata ON metadata.document_id = document.id WHERE ";
         if (givenTerm != '') {
-            sql += "(term.representation = '" + givenTerm + "' OR nlp_phrase LIKE '%" + givenTerm + "%') ";
+            sql += "(term.representation = '" + givenTerm + "') ";
         } else if (givenTerm == '' && hasData) {
             sql += "1=1 ";
         } else if (givenTerm == '' && !hasData) {

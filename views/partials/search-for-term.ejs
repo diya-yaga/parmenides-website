@@ -24,7 +24,7 @@
             let str = $("#givenTermPrint").text();
             var term = userInput;
 
-            var termRegExp = new RegExp(term, 'gi')
+            var termRegExp = new RegExp('\\b' + term + '\\b', 'gi')
             str = str.replace(termRegExp, function(match) {
                 return '<span class="highlight">' + matchCase(term, match) + '</span>'
             });

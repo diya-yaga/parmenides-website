@@ -16,6 +16,12 @@
         <a href= <%= docUrl %> ><%= docTitle[0].split('","')[0].substring(10) %></a>
     </h3>
     <br>
+    <div id="otherTerms" class="invisible">
+        <% for (var i = 0; i < otherTerms.length; i++) { %>
+            <%=otherTerms[i]%>,
+        <% } %>
+        
+    </div>
     <div style="outline: 1px; outline-style: solid; padding: 1rem;" >
         <p id="documentContent">
             <% let passage = "" %>
@@ -26,13 +32,20 @@
             <%= passage %>
         </p>
     </div>
-
+    
     <script>
         $(document).ready(function() {
             let content = $("#documentContent").text();
             var term = $('#term').text().trim();
-            var termRegExp = new RegExp(term, 'g')
-            content = content.replace(termRegExp, '<span class="highlight">' + term + '</span>');
+            var allTerms = $('#otherTerms').text();
+            var arr = allTerms.split(',');
+            for (var i = 0; i < arr.length-1; i++) {
+                term = arr[i].trim();
+                var termRegExp = new RegExp('\\b' + term + '\\b', 'g')
+                content = content.replace(termRegExp, '<span class="highlight">' + term + '</span>');
+            }
+            
+            
             $("#documentContent").html(content);
         });
     </script>
