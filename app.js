@@ -4,6 +4,7 @@ const ejs = require("ejs");
 const sqlite3 = require("sqlite3");
 const fs = require('fs');
 const { spawn } = require('child_process');
+const { normalize } = require("path");
 
 const app = express();
 
@@ -450,28 +451,37 @@ app.post("/", function(req, res) {
     }
     var radioResult = req.body.flexRadioDefault;
     var query;
-    const python = spawn("python", ["normalize-single-term.py", req.body.word]);
-    let processed_data = '';
-
-    python.stdout.on('data', function(data) {
-        processed_data = data.toString();
-    })
-    python.stderr.on('data', data => {
-        console.error('stderr');
-    })
-    python.on('exit', (code) => {
-        console.log(processed_data)
+    console.log('term: ' + req.body.word);
+    
+    let arr = [];
+    normalizeTerm(req.body.word).then(response => {
+        arr.push(response.trim());
+        console.log(arr);
+        return normalizeTerm(req.body.headInput);
+    }).then(response => {
+        arr.push(response.trim());
+        console.log(arr);
+        return normalizeTerm(req.body.depInput);
+    }).then(response => {
+        arr.push(response.trim());
+        console.log(arr);
+        return normalizeTerm(req.body.titleInput);
+    }).then(response => {
+        arr.push(response.trim());
+        console.log(arr);
         if (radioResult == 'Terms') { 
-            query = generateQuery(processed_data.trim(), req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
+            query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.partOfSpeechSelect, arr[1], arr[2], req.body.relSelect])
             console.log(query);
             usingItNow(myCallback, query);
             res.redirect("/term-table");
         } else if (radioResult == 'Documents') {
-            query = generateQuery(processed_data.trim(), req.body.flexRadioDefault, [req.body.titleInput, metadata, authors, dates]);
+            query = generateQuery(response, req.body.flexRadioDefault, [arr[3], metadata, authors, dates]);
             console.log(query);
             usingItNow(myCallback, query);
             res.redirect("/doc-table");
         }
+    }).catch(err => {
+        console.log(err);
     })
 });
 
@@ -551,3 +561,24 @@ function generateQuery (givenTerm, selected, data) {
     }
     return sql;
 };
+
+function normalizeTerm(term) {
+    const python = spawn("python", ["normalize-single-term.py", term]);
+    let processed_data = '';
+    return new Promise((resolve, reject) => {
+        python.stdout.on('data', function(data) {
+            processed_data = data.toString();
+        })
+        python.stderr.on('data', data => {
+            console.error('got an error! ' + processed_data);
+        })
+        python.on('exit', (code) => {
+            if (processed_data != '') {
+                resolve(processed_data);
+            }
+            else {
+                resolve('');
+            }
+        })
+    })
+}
