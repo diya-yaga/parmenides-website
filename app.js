@@ -4,7 +4,6 @@ const ejs = require("ejs");
 const sqlite3 = require("sqlite3");
 const fs = require('fs');
 const { spawn } = require('child_process');
-const { normalize } = require("path");
 
 const app = express();
 
@@ -454,35 +453,83 @@ app.post("/", function(req, res) {
     console.log('term: ' + req.body.word);
     
     let arr = [];
-    normalizeTerm(req.body.word).then(response => {
-        arr.push(response.trim());
-        console.log(arr);
-        return normalizeTerm(req.body.headInput);
-    }).then(response => {
-        arr.push(response.trim());
-        console.log(arr);
-        return normalizeTerm(req.body.depInput);
-    }).then(response => {
-        arr.push(response.trim());
-        console.log(arr);
-        return normalizeTerm(req.body.titleInput);
-    }).then(response => {
-        arr.push(response.trim());
-        console.log(arr);
-        if (radioResult == 'Terms') { 
-            query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.partOfSpeechSelect, arr[1], arr[2], req.body.relSelect])
-            console.log(query);
-            usingItNow(myCallback, query);
-            res.redirect("/term-table");
-        } else if (radioResult == 'Documents') {
-            query = generateQuery(response, req.body.flexRadioDefault, [arr[3], metadata, authors, dates]);
+    
+
+    if (radioResult == 'Terms') { 
+        if (req.body.headInput == '' && req.body.depInput == '') {
+            normalizeTerm(req.body.word).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, req.body.depInput, req.body.relSelect])
+                console.log(query);
+                usingItNow(myCallback, query);
+                res.redirect("/term-table");
+            }).catch(err => {
+                console.log(err);
+            })
+        } else if (req.body.depInput == '') {
+            normalizeTerm(req.body.word).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                return normalizeTerm(req.body.headInput);
+            }).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.partOfSpeechSelect, arr[1], req.body.depInput, req.body.relSelect])
+                console.log(query);
+                usingItNow(myCallback, query);
+                res.redirect("/term-table");
+            }).catch(err => {
+                console.log(err);
+            })
+        } else if (req.body.headInput == '') {
+            normalizeTerm(req.body.word).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                return normalizeTerm(req.body.depInput);
+            }).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.partOfSpeechSelect, req.body.headInput, arr[1], req.body.relSelect])
+                console.log(query);
+                usingItNow(myCallback, query);
+                res.redirect("/term-table");
+            }).catch(err => {
+                console.log(err);
+            })
+        } else {
+            normalizeTerm(req.body.word).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                return normalizeTerm(req.body.headInput);
+            }).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                return normalizeTerm(req.body.depInput);
+            }).then(response => {
+                arr.push(response.trim());
+                console.log(arr);
+                query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.partOfSpeechSelect, arr[1], arr[2], req.body.relSelect])
+                console.log(query);
+                usingItNow(myCallback, query);
+                res.redirect("/term-table");
+            }).catch(err => {
+                console.log(err);
+            })
+        }
+        
+    } else if (radioResult == 'Documents') {
+        normalizeTerm(req.body.word).then(response => {
+            arr.push(response.trim());
+            console.log(arr);
+            query = generateQuery(arr[0], req.body.flexRadioDefault, [req.body.titleInput, metadata, authors, dates]);
             console.log(query);
             usingItNow(myCallback, query);
             res.redirect("/doc-table");
-        }
-    }).catch(err => {
-        console.log(err);
-    })
+        }).catch(err => {
+            console.log(err);
+        })
+    }
 });
 
 app.listen(3000, function() {
@@ -531,7 +578,7 @@ function generateQuery (givenTerm, selected, data) {
 
 
         if (data[0] != '') {
-            sql += "AND document.title LIKE TRIM('" + data[0] + "') ";
+            sql += "AND document.title LIKE TRIM('%" + data[0] + "%') ";
         }
         if (data[1][0][0] != '' || data[1][0][1] != '') {
             sql += "AND ((metadata.key LIKE TRIM('" + data[1][0][0] + "') AND metadata.value LIKE TRIM('" + data[1][0][1] + "')) ";
@@ -573,12 +620,7 @@ function normalizeTerm(term) {
             console.error('got an error! ' + processed_data);
         })
         python.on('exit', (code) => {
-            if (processed_data != '') {
-                resolve(processed_data);
-            }
-            else {
-                resolve('');
-            }
+            resolve(processed_data);
         })
     })
 }
