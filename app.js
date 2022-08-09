@@ -536,6 +536,17 @@ app.listen(3000, function() {
     console.log("Server started on port 3000");
 });
 
+/**
+ * Builds a SQLite query based on the user's search input.
+ * 
+ * When the user searches for a term/document or performs an advanced search, this function is called. This function builds a SQLite query from the given parameters.
+ * This SQLite query is performed on the database, and the results are displayed as the search results on the web app. 
+ * 
+ * @param {string} givenTerm The user inputted term that is being searched.
+ * @param {string} selected The results of the radio button indicating whether the user is searching for terms or documents.
+ * @param {array} data An array containing advanced search parameters inputted by the user.
+ * @return {string} The SQLite query that will be performed on the database given the inputted parameters. 
+ */
 function generateQuery (givenTerm, selected, data) {
     var sql = "";
     var hasData = false;
@@ -580,6 +591,10 @@ function generateQuery (givenTerm, selected, data) {
         if (data[0] != '') {
             sql += "AND document.title LIKE TRIM('%" + data[0] + "%') ";
         }
+        /*
+         * Adds the portion of the SQL query that searches based on metadata key. Here, the metadata keys available are
+         * journal, number, pages, PDF, and volume. 
+         */
         if (data[1][0][0] != '' || data[1][0][1] != '') {
             sql += "AND ((metadata.key LIKE TRIM('" + data[1][0][0] + "') AND metadata.value LIKE TRIM('" + data[1][0][1] + "')) ";
             for (var i = 1; i < data[1].length; i++) {
@@ -609,6 +624,15 @@ function generateQuery (givenTerm, selected, data) {
     return sql;
 };
 
+/**
+ * Normalizes the parameter using Parmenides. 
+ * 
+ * Runs the inputted term or phrase through Parmenides and returns a Promise containing the normalized version of that term or phrase. This term or phrase is then 
+ * used in search queries, to improve accuracy of results and account for variations of the same term or phrase. 
+ * 
+ * @param {string} term The natural language term or phrase that must be normalized. 
+ * @return {Promise} The normalized form of the inputted term or phrase. 
+ */
 function normalizeTerm(term) {
     const python = spawn("python", ["normalize-single-term.py", term]);
     let processed_data = '';
